@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="RoboQuest - A charming 3D platformer adventure featuring a cute robot hero in colorful, vibrant worlds. Available on iOS and Android.">
+    <meta name="keywords" content="indie game, mobile platformer, 3D platformer, cute robot, Unity game, mobile gaming">
+    <meta property="og:title" content="RoboQuest - Charming 3D Platformer Adventure">
+    <meta property="og:description" content="Join our adorable robot hero in a colorful 3D platforming adventure. Explore vibrant worlds, solve puzzles, and collect treasures!">
+    <meta property="og:image" content="./images/hero-robot.png">
+    <meta property="og:url" content="https://roboquest-game.com">
+    <meta name="twitter:card" content="summary_large_image">
+    
+    <title>RoboQuest - Charming 3D Platformer Adventure</title>
+    
+    <!-- Fonts from research recommendations -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Fredoka+One:wght@400&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="images/favicon.png">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="logo-icon">🤖</div>
+                <span class="logo-text">RoboQuest</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#features" class="nav-link">Features</a></li>
+                <li><a href="#gallery" class="nav-link">Gallery</a></li>
+                <li><a href="#story" class="nav-link">Story</a></li>
+                <li><a href="#press" class="nav-link">Press</a></li>
+                <li><a href="#download" class="nav-link download-btn">Download</a></li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Meet <span class="highlight">Robo</span>
+                    <br>Your New Adventure Buddy!
+                </h1>
+                <p class="hero-subtitle">
+                    Explore colorful 3D worlds, solve clever puzzles, and collect shiny treasures 
+                    in this charming platformer adventure designed for mobile gaming fun.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#download" class="btn btn-primary">
+                        <span class="btn-icon">📱</span>
+                        Download Free
+                    </a>
+                    <a href="#trailer" class="btn btn-secondary">
+                        <span class="btn-icon">▶️</span>
+                        Watch Trailer
+                    </a>
+                </div>
+                <div class="hero-badges">
+                    <div class="store-badge app-store">
+                        <span>📱 App Store</span>
+                    </div>
+                    <div class="store-badge google-play">
+                        <span>🤖 Google Play</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="robot-showcase">
+                    <div class="hero-robot-placeholder">
+                        <div class="robot-character">🤖</div>
+                        <div class="robot-glow"></div>
+                    </div>
+                    <div class="floating-elements">
+                        <div class="floating-coin coin-1">🪙</div>
+                        <div class="floating-coin coin-2">💎</div>
+                        <div class="floating-coin coin-3">⭐</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-bg-elements">
+            <div class="bg-cloud cloud-1"></div>
+            <div class="bg-cloud cloud-2"></div>
+            <div class="bg-cloud cloud-3"></div>
+        </div>
+    </section>
+
+    <!-- Game Features -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">Adventure Awaits!</h2>
+            <p class="section-subtitle">Discover what makes RoboQuest special</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎮</div>
+                    <h3>Intuitive Controls</h3>
+                    <p>Smooth, responsive touch controls designed for mobile platforming perfection. Jump, hover, and explore with ease!</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🌈</div>
+                    <h3>Colorful Worlds</h3>
+                    <p>Explore vibrant 3D environments filled with secrets, puzzles, and delightful surprises around every corner.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>Adorable Hero</h3>
+                    <p>Meet Robo, your charming robotic companion with expressive animations and a heart of gold.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🧩</div>
+                    <h3>Clever Puzzles</h3>
+                    <p>Challenge your mind with creative puzzles and platforming sequences that reward exploration and creativity.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎵</div>
+                    <h3>Catchy Soundtrack</h3>
+                    <p>Immerse yourself in delightful music and sound effects that bring each world to life.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">💝</div>
+                    <h3>Free to Play</h3>
+                    <p>Start your adventure for free! Optional upgrades available to support development.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery/Screenshots -->
+    <section id="gallery" class="gallery">
+        <div class="container">
+            <h2 class="section-title">See RoboQuest in Action</h2>
+            <p class="section-subtitle">Screenshots from your upcoming adventure</p>
+            
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <div class="gallery-placeholder" style="background: linear-gradient(45deg, #667eea, #764ba2);">
+                        <div class="placeholder-content">🏝️<br><small>Sky Islands</small></div>
+                    </div>
+                    <div class="gallery-overlay">
+                        <p>Explore floating islands in the sky</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder" style="background: linear-gradient(45deg, #f093fb, #f5576c);">
+                        <div class="placeholder-content">🧩<br><small>Puzzles</small></div>
+                    </div>
+                    <div class="gallery-overlay">
+                        <p>Solve clever environmental puzzles</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder" style="background: linear-gradient(45deg, #4facfe, #00f2fe);">
+                        <div class="placeholder-content">⚡<br><small>Abilities</small></div>
+                    </div>
+                    <div class="gallery-overlay">
+                        <p>Master Robo's special abilities</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder" style="background: linear-gradient(45deg, #43e97b, #38f9d7);">
+                        <div class="placeholder-content">💎<br><small>Treasures</small></div>
+                    </div>
+                    <div class="gallery-overlay">
+                        <p>Collect treasures and unlock secrets</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Trailer Section -->
+            <div id="trailer" class="trailer-section">
+                <h3>Watch the Adventure Unfold</h3>
+                <div class="video-container">
+                    <div class="video-placeholder">
+                        <div class="play-button">▶️</div>
+                        <p>Gameplay Trailer<br><small>Coming Soon</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Developer Story -->
+    <section id="story" class="developer-story">
+        <div class="container">
+            <div class="story-content">
+                <div class="story-text">
+                    <h2>From Concept to Adventure</h2>
+                    <p class="story-intro">
+                        Hi! I'm an indie developer passionate about creating joyful gaming experiences. 
+                        RoboQuest was inspired by the wonder and charm of classic 3D platformers like Astro Bot.
+                    </p>
+                    <div class="story-details">
+                        <div class="story-point">
+                            <h4>🎨 Art & Design</h4>
+                            <p>Every environment and character was crafted with love, using Unity's powerful tools to bring vibrant worlds to life.</p>
+                        </div>
+                        <div class="story-point">
+                            <h4>🎮 Gameplay Focus</h4>
+                            <p>Tight controls and smooth gameplay were the top priority - every jump and movement feels just right.</p>
+                        </div>
+                        <div class="story-point">
+                            <h4>💚 Community First</h4>
+                            <p>Built with player feedback and designed to bring joy to mobile gamers everywhere.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="story-visual">
+                    <div class="dev-image-placeholder">
+                        <div class="dev-workspace">💻<br><small>Unity Development</small></div>
+                    </div>
+                    <div class="dev-stats">
+                        <div class="stat">
+                            <span class="stat-number">12</span>
+                            <span class="stat-label">Months Development</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">50+</span>
+                            <span class="stat-label">Unique Levels</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">Unity</span>
+                            <span class="stat-label">Engine</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community & Social -->
+    <section id="community" class="community">
+        <div class="container">
+            <h2 class="section-title">Join the RoboQuest Community</h2>
+            <p class="section-subtitle">Connect with fellow adventurers and stay updated on development</p>
+            
+            <div class="community-links">
+                <a href="#" class="social-link discord">
+                    <div class="social-icon">💬</div>
+                    <div class="social-info">
+                        <h4>Discord Community</h4>
+                        <p>Chat with other players and get exclusive updates</p>
+                    </div>
+                </a>
+                
+                <a href="#" class="social-link twitter">
+                    <div class="social-icon">🐦</div>
+                    <div class="social-info">
+                        <h4>Follow on Twitter</h4>
+                        <p>Daily development updates and behind-the-scenes content</p>
+                    </div>
+                </a>
+                
+                <a href="#" class="social-link youtube">
+                    <div class="social-icon">📺</div>
+                    <div class="social-info">
+                        <h4>YouTube Channel</h4>
+                        <p>Dev diaries, gameplay videos, and tutorials</p>
+                    </div>
+                </a>
+                
+                <a href="#" class="social-link reddit">
+                    <div class="social-icon">🔴</div>
+                    <div class="social-info">
+                        <h4>Reddit Community</h4>
+                        <p>Join discussions and share your adventures</p>
+                    </div>
+                </a>
+            </div>
+            
+            <!-- Newsletter Signup -->
+            <div class="newsletter-signup">
+                <h3>Stay in the Loop</h3>
+                <p>Get notified about updates, beta access, and launch news</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Enter your email" class="email-input" required>
+                    <button type="submit" class="btn btn-primary">Join Adventure</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download/CTA Section -->
+    <section id="download" class="download-section">
+        <div class="container">
+            <div class="download-content">
+                <h2>Ready for Adventure?</h2>
+                <p>Download RoboQuest now and start your colorful platforming journey!</p>
+                
+                <div class="download-buttons">
+                    <a href="#" class="download-btn ios">
+                        <div class="store-button">
+                            <span class="store-icon">🍎</span>
+                            <div class="store-text">
+                                <small>Download on the</small>
+                                <strong>App Store</strong>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="#" class="download-btn android">
+                        <div class="store-button">
+                            <span class="store-icon">🤖</span>
+                            <div class="store-text">
+                                <small>Get it on</small>
+                                <strong>Google Play</strong>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="download-info">
+                    <div class="info-item">
+                        <span class="info-icon">📱</span>
+                        <span>Compatible with iOS 12+ and Android 8+</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">💾</span>
+                        <span>Only 150MB download size</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">🆓</span>
+                        <span>Free to play with optional purchases</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Press Kit -->
+    <section id="press" class="press-kit">
+        <div class="container">
+            <h2 class="section-title">Press & Media</h2>
+            <p class="section-subtitle">Resources for journalists, content creators, and reviewers</p>
+            
+            <div class="press-grid">
+                <div class="press-item">
+                    <h4>📁 Press Kit</h4>
+                    <p>High-resolution screenshots, logos, and promotional materials</p>
+                    <a href="assets/roboquest-press-kit.zip" class="press-link">Download Kit</a>
+                </div>
+                
+                <div class="press-item">
+                    <h4>📝 Fact Sheet</h4>
+                    <p>Game details, features, and technical specifications</p>
+                    <a href="assets/roboquest-fact-sheet.pdf" class="press-link">View Details</a>
+                </div>
+                
+                <div class="press-item">
+                    <h4>📧 Media Contact</h4>
+                    <p>For interviews, review copies, and collaboration inquiries</p>
+                    <a href="mailto:press@roboquest-game.com" class="press-link">Contact Us</a>
+                </div>
+                
+                <div class="press-item">
+                    <h4>🎮 Review Copy</h4>
+                    <p>Request early access for reviews and content creation</p>
+                    <a href="#review-request" class="press-link">Request Access</a>
+                </div>
+            </div>
+            
+            <!-- Developer Bio -->
+            <div class="developer-bio">
+                <div class="dev-avatar-placeholder">👨‍💻</div>
+                <div class="bio-content">
+                    <h4>About the Developer</h4>
+                    <p>
+                        Independent game developer with a passion for creating delightful mobile experiences. 
+                        Specialized in Unity development and inspired by the joy of classic platformers.
+                    </p>
+                    <div class="dev-links">
+                        <a href="#" class="dev-link">Twitter</a>
+                        <a href="#" class="dev-link">LinkedIn</a>
+                        <a href="#" class="dev-link">Portfolio</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <div class="footer-logo-icon">🤖</div>
+                        <span class="footer-logo-text">RoboQuest</span>
+                    </div>
+                    <p class="footer-description">
+                        A charming 3D platformer adventure that brings joy to mobile gaming.
+                    </p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Game</h4>
+                    <ul class="footer-links">
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#gallery">Screenshots</a></li>
+                        <li><a href="#download">Download</a></li>
+                        <li><a href="#press">Press Kit</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Community</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Discord</a></li>
+                        <li><a href="#">Twitter</a></li>
+                        <li><a href="#">Reddit</a></li>
+                        <li><a href="#">YouTube</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="#contact">Contact</a></li>
+                        <li><a href="#privacy">Privacy Policy</a></li>
+                        <li><a href="#terms">Terms of Service</a></li>
+                        <li><a href="#help">Help & FAQ</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 RoboQuest. Made with ❤️ by an indie developer.</p>
+                <div class="footer-badges">
+                    <span class="badge">Unity</span>
+                    <span class="badge">Indie Game</span>
+                    <span class="badge">Mobile First</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+    
+    <!-- Analytics (to be configured) -->
+    <script>
+        // Google Analytics and game-specific tracking will be added here
+    </script>
+</body>
+</html>

@@ -21,12 +21,12 @@ class Player {
         this.coins = 0;
         this.lives = 3;
         
-        // Movement parameters (tuned for fluid feel)
-        this.moveSpeed = 28; // Faster, fluid traversal
-        this.jumpForce = 10; // Lower, smoother jump arc
+        // Movement parameters (TPS-style, more responsive)
+        this.moveSpeed = 50; // Faster traversal for tighter feel
+        this.jumpForce = 11; // Slightly stronger, still smooth
         this.hoverForce = 6; // Softer hover assist
-        this.accelLerp = 0.2; // Velocity smoothing factor per frame
-        this.turnLerp = 0.2;  // Rotation smoothing factor per frame
+        this.accelLerp = 0.35; // Quicker acceleration to target speed
+        this.turnLerp = 0.25;  // Snappier turning
         this.maxHoverTime = 1.0; // 1 second hover like Astro Bot
         this.currentHoverTime = 0;
         this.isHovering = false;
@@ -307,14 +307,6 @@ class Player {
                 this.physicsBody.force.x += desiredVX * 0.5;
                 this.physicsBody.force.z += desiredVZ * 0.5;
                 this.animationState = 'walking';
-                
-                // Rotate visual to face movement direction (smoothed)
-                const targetYaw = Math.atan2(moveDirThree.x, moveDirThree.z);
-                const lerpAngle = (a, b, t) => {
-                    let delta = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI;
-                    return a + delta * t;
-                };
-                this.mesh.rotation.y = lerpAngle(this.mesh.rotation.y, targetYaw, this.turnLerp);
             } else {
                 // Apply gentle damping to stop sliding
                 this.physicsBody.velocity.x *= 0.90;
@@ -336,20 +328,23 @@ class Player {
             }
         }
 
-        // If not moving, align character to camera forward when orbiting with mouse
-        if (!isMoving) {
-            const cam = this.gameEngine.camera;
-            if (cam && window.gameLogic && window.gameLogic.cameraController && window.gameLogic.cameraController.isMouseDown) {
-                const camForward = new THREE.Vector3();
-                cam.getWorldDirection(camForward);
-                camForward.y = 0; camForward.normalize();
-                const camYaw = Math.atan2(camForward.x, camForward.z);
-                const lerpAngle = (a, b, t) => {
-                    let delta = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI;
-                    return a + delta * t;
-                };
-                this.mesh.rotation.y = lerpAngle(this.mesh.rotation.y, camYaw, this.turnLerp);
-            }
+        // TPS-style facing: if mouse orbiting, face camera forward; otherwise face movement direction
+        const cam = this.gameEngine.camera;
+        let targetYaw = null;
+        if (cam && window.gameLogic && window.gameLogic.cameraController && window.gameLogic.cameraController.isMouseDown) {
+            const camForward = new THREE.Vector3();
+            cam.getWorldDirection(camForward);
+            camForward.y = 0; camForward.normalize();
+            targetYaw = Math.atan2(camForward.x, camForward.z);
+        } else if (isMoving && moveDirThree.lengthSq() > 0) {
+            targetYaw = Math.atan2(moveDirThree.x, moveDirThree.z);
+        }
+        if (targetYaw !== null) {
+            const lerpAngle = (a, b, t) => {
+                let delta = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI;
+                return a + delta * t;
+            };
+            this.mesh.rotation.y = lerpAngle(this.mesh.rotation.y, targetYaw, this.turnLerp);
         }
         
         // Jumping (Space key)

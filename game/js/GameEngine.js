@@ -26,7 +26,7 @@ class GameEngine {
         this.createScene();
         this.createRenderer();
         this.createCamera();
-        // this.createPhysicsWorld(); // Disabled for initial testing
+        this.createPhysicsWorld(); // Re-enabled with working Cannon.js v0.6.2
         this.setupLighting();
         this.setupEventListeners();
         this.hideLoading();
@@ -193,8 +193,10 @@ class GameEngine {
         
         const deltaTime = this.clock.getDelta();
         
-        // Update physics world (disabled for initial testing)
-        // this.world.step(deltaTime);
+        // Update physics world (re-enabled with working Cannon.js)
+        if (this.world) {
+            this.world.step(deltaTime);
+        }
         
         // Update game objects (will be called by game logic)
         if (window.gameLogic) {

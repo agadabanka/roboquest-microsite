@@ -91,12 +91,18 @@ class World {
         console.log('🌍 Ground plane created and added to scene');
         console.log('📍 Ground position:', groundMesh.position);
         
-        // Physics ground (disabled for initial testing)
-        // const groundShape = new CANNON.Box(new CANNON.Vec3(100, 0.1, 100));
-        // const groundBody = new CANNON.Body({ mass: 0 });
-        // groundBody.addShape(groundShape);
-        // groundBody.position.set(0, 0, 0);
-        // this.world.add(groundBody);
+        // Physics ground (re-enabled with working Cannon.js v0.6.2)
+        console.log('🌍 STEP 3: Creating physics ground...');
+        try {
+            const groundShape = new CANNON.Box(new CANNON.Vec3(100, 0.1, 100));
+            const groundBody = new CANNON.Body({ mass: 0 });
+            groundBody.addShape(groundShape);
+            groundBody.position.set(0, 0, 0);
+            this.world.add(groundBody);
+            console.log('✅ Physics ground created successfully');
+        } catch (e) {
+            console.error('❌ Physics ground creation failed:', e);
+        }
     }
     
     createStartingArea() {
@@ -151,14 +157,21 @@ class World {
         
         this.scene.add(mesh);
         
-        // Physics body (disabled for initial testing)
-        // const shape = new CANNON.Box(new CANNON.Vec3(width/2, height/2, depth/2));
-        // const body = new CANNON.Body({ mass: 0 }); // Static platforms
-        // body.addShape(shape);
-        // body.position.set(x, y, z);
-        // this.world.add(body);
+        // Physics body (re-enabled systematically - Step 4)
+        console.log('🏗️ STEP 4: Creating platform physics at', x, y, z);
+        let physicsBody = null;
+        try {
+            const shape = new CANNON.Box(new CANNON.Vec3(width/2, height/2, depth/2));
+            physicsBody = new CANNON.Body({ mass: 0 }); // Static platforms
+            physicsBody.addShape(shape);
+            physicsBody.position.set(x, y, z);
+            this.world.add(physicsBody);
+            console.log('✅ Platform physics created successfully');
+        } catch (e) {
+            console.error('❌ Platform physics creation failed:', e);
+        }
         
-        this.platforms.push({ mesh, body: null });
+        this.platforms.push({ mesh, body: physicsBody });
         
         return { mesh, body: null };
     }

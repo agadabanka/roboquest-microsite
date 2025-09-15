@@ -31,7 +31,7 @@ class Player {
         
         // Create visual and physics representation
         this.createPlayerMesh();
-        // this.createPhysicsBody(); // Disabled for initial testing
+        this.createPhysicsBody(); // Re-enabled for Step 5: Player physics
         this.setupAnimations();
     }
     
@@ -132,18 +132,24 @@ class Player {
     }
     
     createPhysicsBody() {
-        // Physics body (capsule shape for smooth movement)
-        const playerShape = new CANNON.Cylinder(0.8, 0.8, 2.0, 8);
-        this.physicsBody = new CANNON.Body({ mass: 1 });
-        this.physicsBody.addShape(playerShape);
-        this.physicsBody.position.set(0, 5, 0);
-        this.physicsBody.material = new CANNON.Material('player');
+        console.log('🤖 STEP 5: Creating player physics body...');
+        try {
+            // Physics body (capsule shape for smooth movement)
+            const playerShape = new CANNON.Cylinder(0.8, 0.8, 2.0, 8);
+            this.physicsBody = new CANNON.Body({ mass: 1 });
+            this.physicsBody.addShape(playerShape);
+            this.physicsBody.position.set(0, 5, 0);
+            this.physicsBody.material = new CANNON.Material('player');
         
-        // Prevent rotation (player stays upright)
-        this.physicsBody.fixedRotation = true;
-        this.physicsBody.updateMassProperties();
-        
-        this.world.add(this.physicsBody);
+            // Prevent rotation (player stays upright)
+            this.physicsBody.fixedRotation = true;
+            this.physicsBody.updateMassProperties();
+            
+            this.world.add(this.physicsBody);
+            console.log('✅ Player physics body created and added to world');
+        } catch (e) {
+            console.error('❌ Player physics creation failed:', e);
+        }
         
         // Ground detection
         this.physicsBody.addEventListener('collide', (event) => {
@@ -204,15 +210,17 @@ class Player {
         this.updateCamera(deltaTime);
         this.updateHUD();
         
-        // Visual updates only (no physics sync needed)
-        // this.mesh.position.copy(this.physicsBody.position);
-        // this.mesh.quaternion.copy(this.physicsBody.quaternion);
+        // Sync visual mesh with physics body (Step 6: Physics movement)
+        if (this.physicsBody) {
+            this.mesh.position.copy(this.physicsBody.position);
+            this.mesh.quaternion.copy(this.physicsBody.quaternion);
+        }
     }
     
     handleInput(deltaTime) {
-        // Physics-free movement for initial testing  
+        // Step 6: Physics-based movement 
+        const force = new CANNON.Vec3();
         let isMoving = false;
-        const moveSpeed = 0.1;
         
         // Debug input every 60 frames (1 second) to avoid spam
         if (Math.floor(Date.now() / 1000) % 2 === 0 && Math.random() < 0.02) {
@@ -225,31 +233,32 @@ class Player {
             });
         }
         
-        // Direct mesh movement (physics-free)
+        // Physics-based movement (Step 6: Final movement system)
         if (this.gameEngine.isKeyPressed('KeyW') || this.gameEngine.isKeyPressed('ArrowUp')) {
-            this.mesh.position.z -= moveSpeed;
+            force.z -= this.moveSpeed;
             isMoving = true;
-            console.log('⬆️ Moving forward, new Z:', this.mesh.position.z);
         }
         if (this.gameEngine.isKeyPressed('KeyS') || this.gameEngine.isKeyPressed('ArrowDown')) {
-            this.mesh.position.z += moveSpeed;
+            force.z += this.moveSpeed;
             isMoving = true;
-            console.log('⬇️ Moving backward, new Z:', this.mesh.position.z);
         }
         if (this.gameEngine.isKeyPressed('KeyA') || this.gameEngine.isKeyPressed('ArrowLeft')) {
-            this.mesh.position.x -= moveSpeed;
+            force.x -= this.moveSpeed;
             isMoving = true;
-            console.log('⬅️ Moving left, new X:', this.mesh.position.x);
         }
         if (this.gameEngine.isKeyPressed('KeyD') || this.gameEngine.isKeyPressed('ArrowRight')) {
-            this.mesh.position.x += moveSpeed;
+            force.x += this.moveSpeed;
             isMoving = true;
-            console.log('➡️ Moving right, new X:', this.mesh.position.x);
         }
         
-        // Update animation state
-        if (isMoving) {
+        // Apply movement force to physics body
+        if (isMoving && this.physicsBody) {
+            this.physicsBody.force.x += force.x;
+            this.physicsBody.force.z += force.z;
             this.animationState = 'walking';
+            if (Math.random() < 0.01) { // Occasional debug
+                console.log('🚀 Applying physics force:', force);
+            }
         } else {
             this.animationState = 'idle';
         }

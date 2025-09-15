@@ -321,12 +321,15 @@ class World {
         const treeGroup = new THREE.Group();
         const textureLoader = new THREE.TextureLoader();
         
-        // Textured trunk (bark texture)
+        // Textured trunk (bark texture from reliable source)
         const trunkTexture = textureLoader.load(
-            'https://threejs.org/examples/textures/terrain/grass_dirt_diffuse.jpg',
-            () => console.log('✅ Bark texture loaded'),
+            'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_diff_1k.jpg',
+            () => console.log('✅ Bark texture loaded from Poly Haven'),
             undefined,
-            () => console.warn('⚠️ Bark texture failed, using brown')
+            () => {
+                console.warn('⚠️ Bark texture failed, using procedural bark');
+                trunkMesh.material = this.createProceduralBarkTexture();
+            }
         );
         trunkTexture.wrapS = THREE.RepeatWrapping;
         trunkTexture.wrapT = THREE.RepeatWrapping;
@@ -342,12 +345,15 @@ class World {
         trunkMesh.castShadow = true;
         treeGroup.add(trunkMesh);
         
-        // Leaves with more organic texture (inspired by Astro Bot coral trees)
+        // Leaves with organic texture (inspired by Astro Bot coral trees)
         const leavesTexture = textureLoader.load(
-            'https://threejs.org/examples/textures/terrain/cliff_diffuse.jpg',
-            () => console.log('✅ Leaves texture loaded'),
+            'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/moss_02/moss_02_diff_1k.jpg',
+            () => console.log('✅ Leaves texture loaded from Poly Haven'),
             undefined,
-            () => console.warn('⚠️ Leaves texture failed, using green')
+            () => {
+                console.warn('⚠️ Leaves texture failed, using procedural foliage');
+                leavesMesh.material = this.createProceduralFoliageTexture();
+            }
         );
         leavesTexture.wrapS = THREE.RepeatWrapping;
         leavesTexture.wrapT = THREE.RepeatWrapping;
@@ -623,6 +629,86 @@ class World {
         
         console.log(`🎨 Created procedural platform texture for color ${baseColor}`);
         return new THREE.MeshLambertMaterial({ map: texture });
+    }
+    
+    // Procedural bark texture
+    createProceduralBarkTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+        
+        // Brown bark base
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(0, 0, 256, 256);
+        
+        // Add bark texture lines
+        ctx.strokeStyle = '#654321';
+        ctx.lineWidth = 3;
+        
+        for (let i = 0; i < 20; i++) {
+            const y = Math.random() * 256;
+            const wobble = Math.random() * 20 - 10;
+            
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(256, y + wobble);
+            ctx.stroke();
+        }
+        
+        // Add vertical grain
+        ctx.strokeStyle = '#A0522D';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 50; i++) {
+            const x = Math.random() * 256;
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x + Math.random() * 10 - 5, 256);
+            ctx.stroke();
+        }
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        
+        console.log('🎨 Created procedural bark texture');
+        return new THREE.MeshLambertMaterial({ map: texture, color: 0x8B4513 });
+    }
+    
+    // Procedural foliage texture
+    createProceduralFoliageTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+        
+        // Green foliage base
+        const gradient = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+        gradient.addColorStop(0, '#90EE90');
+        gradient.addColorStop(0.5, '#32CD32');
+        gradient.addColorStop(1, '#228B22');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 256, 256);
+        
+        // Add leaf-like details
+        ctx.fillStyle = '#228B22';
+        for (let i = 0; i < 100; i++) {
+            const x = Math.random() * 256;
+            const y = Math.random() * 256;
+            const size = Math.random() * 8 + 2;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        
+        console.log('🎨 Created procedural foliage texture');
+        return new THREE.MeshLambertMaterial({ map: texture, color: 0x32CD32 });
     }
     
     // Dynamic world generation (for future expansion)

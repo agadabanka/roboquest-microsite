@@ -21,9 +21,9 @@ class Player {
         this.coins = 0;
         this.lives = 3;
         
-        // Movement parameters (tuned for responsive feel)
-        this.moveSpeed = 50; // Increased for stronger horizontal movement
-        this.jumpForce = 15;
+        // Movement parameters (tuned to industry standard)
+        this.moveSpeed = 20; // 20 units/second - industry standard for platformers
+        this.jumpForce = 15; // Keep jump as is - feels right
         this.hoverForce = 8;
         this.maxHoverTime = 1.0; // 1 second hover like Astro Bot
         this.currentHoverTime = 0;
@@ -434,24 +434,53 @@ class Player {
     }
     
     updateCamera(deltaTime) {
-        // Third-person camera following (Astro Bot style)
-        const idealCameraPosition = new THREE.Vector3();
-        const idealCameraTarget = new THREE.Vector3();
+        // Third-person camera following with mouse control (Astro Bot style)
+        const mouse = this.gameEngine.getMousePosition();
         
-        // Camera position behind and above the player
-        idealCameraPosition.copy(this.mesh.position);
-        idealCameraPosition.y += 6;
-        idealCameraPosition.z += 8;
+        // Base camera offset
+        let cameraDistance = 8;
+        let cameraHeight = 6;
         
-        // Camera target slightly ahead of the player
-        idealCameraTarget.copy(this.mesh.position);
-        idealCameraTarget.y += 2;
-        
-        // Smooth camera following with lerp
-        this.gameEngine.camera.position.lerp(idealCameraPosition, deltaTime * 3);
-        
-        // Look at the player position
-        this.gameEngine.camera.lookAt(idealCameraTarget);
+        // Mouse control for camera orbit (right-click drag)
+        if (this.gameEngine.isMouseClicked()) {
+            // Orbit camera around player based on mouse position
+            const mouseInfluence = 3;
+            const horizontalAngle = mouse.x * mouseInfluence;
+            const verticalAngle = mouse.y * mouseInfluence;
+            
+            // Calculate camera position with mouse orbit
+            const playerPos = this.mesh.position;
+            this.gameEngine.camera.position.set(
+                playerPos.x + Math.sin(horizontalAngle) * cameraDistance,
+                playerPos.y + cameraHeight + verticalAngle,
+                playerPos.z + Math.cos(horizontalAngle) * cameraDistance
+            );
+            
+            this.gameEngine.camera.lookAt(playerPos.x, playerPos.y + 2, playerPos.z);
+            
+            if (Math.random() < 0.01) {
+                console.log('🖱️ Mouse camera control active:', {mouse, horizontalAngle, verticalAngle});
+            }
+        } else {
+            // Standard follow camera when not using mouse
+            const idealCameraPosition = new THREE.Vector3();
+            const idealCameraTarget = new THREE.Vector3();
+            
+            // Camera position behind and above the player
+            idealCameraPosition.copy(this.mesh.position);
+            idealCameraPosition.y += cameraHeight;
+            idealCameraPosition.z += cameraDistance;
+            
+            // Camera target slightly ahead of the player
+            idealCameraTarget.copy(this.mesh.position);
+            idealCameraTarget.y += 2;
+            
+            // Smooth camera following with lerp
+            this.gameEngine.camera.position.lerp(idealCameraPosition, deltaTime * 3);
+            
+            // Look at the player position
+            this.gameEngine.camera.lookAt(idealCameraTarget);
+        }
     }
     
     updateHUD() {

@@ -295,10 +295,7 @@ class GameEngine {
         gridHelper.position.y = 0.1; // Slightly above ground
         this.scene.add(gridHelper);
         
-        // Add coordinate labels at key positions
-        const loader = new THREE.FontLoader();
-        
-        // Create numbered grid markers for easy reference
+        // Create grid markers for easy reference (no font loader to avoid console errors)
         for (let x = -20; x <= 20; x += squareSize) {
             for (let z = -20; z <= 20; z += squareSize) {
                 if (x % 8 === 0 && z % 8 === 0) { // Every 2 squares

@@ -310,9 +310,11 @@ class Player {
                 
                 // Rotate visual to face movement direction (smoothed)
                 const targetYaw = Math.atan2(moveDirThree.x, moveDirThree.z);
-                this.mesh.rotation.y = THREE.MathUtils.lerpAngle(
-                    this.mesh.rotation.y, targetYaw, this.turnLerp
-                );
+                const lerpAngle = (a, b, t) => {
+                    let delta = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI;
+                    return a + delta * t;
+                };
+                this.mesh.rotation.y = lerpAngle(this.mesh.rotation.y, targetYaw, this.turnLerp);
             } else {
                 // Apply gentle damping to stop sliding
                 this.physicsBody.velocity.x *= 0.90;
@@ -342,9 +344,11 @@ class Player {
                 cam.getWorldDirection(camForward);
                 camForward.y = 0; camForward.normalize();
                 const camYaw = Math.atan2(camForward.x, camForward.z);
-                this.mesh.rotation.y = THREE.MathUtils.lerpAngle(
-                    this.mesh.rotation.y, camYaw, this.turnLerp
-                );
+                const lerpAngle = (a, b, t) => {
+                    let delta = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI;
+                    return a + delta * t;
+                };
+                this.mesh.rotation.y = lerpAngle(this.mesh.rotation.y, camYaw, this.turnLerp);
             }
         }
         

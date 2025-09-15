@@ -77,28 +77,32 @@ class World {
         // Create textured ground material
         const textureLoader = new THREE.TextureLoader();
         
-        // Load grass texture from web (free texture)
-        const grassTexture = textureLoader.load(
-            'https://threejs.org/examples/textures/terrain/grasslight-big.jpg',
-            () => console.log('✅ Grass texture loaded successfully'),
-            undefined,
-            (error) => {
-                console.warn('⚠️ Grass texture failed, using fallback');
-                // Create procedural grass-like texture as fallback
-                groundMesh.material = this.createProceduralGrassTexture();
-            }
-        );
+        // Load grass texture from web (free texture). If it fails, continue without map.
+        let grassTexture = null;
+        try {
+            grassTexture = textureLoader.load(
+                'https://threejs.org/examples/textures/terrain/grasslight-big.jpg',
+                () => console.log('✅ Grass texture loaded successfully'),
+                undefined,
+                (error) => {
+                    console.warn('⚠️ Grass texture failed, using color-only material');
+                }
+            );
+        } catch (e) {
+            console.warn('⚠️ Grass texture load threw synchronously, proceeding without it');
+        }
         
         // Configure texture for tiling
-        grassTexture.wrapS = THREE.RepeatWrapping;
-        grassTexture.wrapT = THREE.RepeatWrapping;
-        grassTexture.repeat.set(20, 20); // Tile 20x20 times for detail
+        if (grassTexture && grassTexture.wrapS !== undefined) {
+            grassTexture.wrapS = THREE.RepeatWrapping;
+            grassTexture.wrapT = THREE.RepeatWrapping;
+            grassTexture.repeat.set(20, 20); // Tile 20x20 times for detail
+        }
         
         // Create textured material
-        const groundMaterial = new THREE.MeshLambertMaterial({
-            map: grassTexture,
-            color: 0x90EE90, // Light green tint
-        });
+        const groundMaterialParams = { color: 0x90EE90 };
+        if (grassTexture) groundMaterialParams.map = grassTexture;
+        const groundMaterial = new THREE.MeshLambertMaterial(groundMaterialParams);
         
         // Main ground plane with texture
         const groundGeometry = new THREE.PlaneGeometry(200, 200);

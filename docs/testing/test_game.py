@@ -78,10 +78,10 @@ class RoboQuestGameTester:
             
             # Check if game objects are initialized
             game_ready = self.driver.execute_script("""
-                return window.gameEngine && 
-                       window.gameLogic && 
-                       window.gameLogic.player &&
-                       window.gameLogic.worldManager;
+                return !!(window.gameEngine && 
+                          window.gameLogic && 
+                          window.gameLogic.player &&
+                          window.gameLogic.worldManager);
             """)
             
             result = {
@@ -126,10 +126,13 @@ class RoboQuestGameTester:
             
             print(f"📍 Initial position: x={initial_pos['x']:.2f}, y={initial_pos['y']:.2f}, z={initial_pos['z']:.2f}")
             
-            # Test movement (press D key for 1 second)
-            body = self.driver.find_element(By.TAG_NAME, 'body')
-            body.send_keys('d')
-            time.sleep(0.5)
+            # Focus canvas and hold D for 1s using ActionChains (reliable movement)
+            canvas = self.driver.find_element(By.ID, 'gameCanvas')
+            canvas.click()
+            actions = webdriver.common.action_chains.ActionChains(self.driver)
+            actions.key_down('d').perform()
+            time.sleep(1.0)
+            actions.key_up('d').perform()
             
             # Get new position
             new_pos = self.driver.execute_script("""
@@ -173,10 +176,13 @@ class RoboQuestGameTester:
                 return window.gameLogic.player.getPosition().y;
             """)
             
-            # Jump test
-            body = self.driver.find_element(By.TAG_NAME, 'body')
-            body.send_keys(Keys.SPACE)
-            time.sleep(0.3)
+            # Jump test (focus canvas and hold Space briefly)
+            canvas = self.driver.find_element(By.ID, 'gameCanvas')
+            canvas.click()
+            actions = webdriver.common.action_chains.ActionChains(self.driver)
+            actions.key_down(Keys.SPACE).perform()
+            time.sleep(0.2)
+            actions.key_up(Keys.SPACE).perform()
             
             # Check if player is higher
             jump_y = self.driver.execute_script("""

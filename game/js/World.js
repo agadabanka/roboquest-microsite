@@ -323,8 +323,8 @@ class World {
         
         // Professional bark texture (local PBR texture set)
         const trunkTexture = textureLoader.load(
-            './textures/bark.png',
-            () => console.log('✅ Professional bark texture loaded (local)'),
+            './textures/gemini_bark.png',
+            () => console.log('✅ AI-generated bark texture loaded (Gemini)'),
             undefined,
             () => {
                 console.warn('⚠️ Local bark texture failed, using procedural');
@@ -356,8 +356,8 @@ class World {
         
         // Professional leaf texture (local PBR texture set)
         const leavesTexture = textureLoader.load(
-            './textures/leaf.png',
-            () => console.log('✅ Professional leaf texture loaded (local)'),
+            './textures/gemini_leaves.png',
+            () => console.log('✅ AI-generated leaf texture loaded (Gemini)'),
             undefined,
             () => {
                 console.warn('⚠️ Local leaf texture failed, using procedural');

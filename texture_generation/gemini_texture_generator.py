@@ -2,7 +2,7 @@
 
 """
 Gemini Texture Generation for RoboQuest
-Generate professional game textures using Imagen 3.0
+Generate professional game textures using gemini-2.5-flash-image-preview
 """
 
 import google.generativeai as genai
@@ -10,7 +10,6 @@ import subprocess
 import os
 from datetime import datetime
 from PIL import Image
-import requests
 from io import BytesIO
 
 def get_gemini_api_key():
@@ -31,45 +30,51 @@ def get_gemini_api_key():
         return None
 
 def generate_tree_bark_texture():
-    """Generate realistic tree bark texture for RoboQuest"""
+    """Generate realistic tree bark texture using gemini-2.5-flash-image-preview"""
     
-    print("🌳 Generating tree bark texture with Gemini...")
+    print("🌳 Generating tree bark texture with Gemini 2.5 Flash...")
     
     # Detailed prompt for tree bark texture
     bark_prompt = """
-    Generate a seamless, tileable tree bark texture for a 3D video game. 
+    Create a seamless, tileable tree bark texture for a 3D video game. 
     Style: Realistic but stylized, similar to Astro Bot aesthetic.
     Requirements:
     - Brown bark with natural wood grain patterns
     - Vertical ridges and horizontal bark lines
     - Suitable for UV mapping on cylindrical tree trunks
     - High contrast for good visibility in 3D games
-    - Seamless edges for tiling
-    - Rich detail but not too noisy
-    - Warm brown tones (not too dark)
-    - Organic, natural appearance
+    - Seamless edges for perfect tiling
+    - Rich detail but clean, not too noisy
+    - Warm brown tones with some variation
+    - Organic, natural bark appearance
+    - Square format, high resolution
     """
     
     try:
-        # Try to generate image using Imagen 4.0 (latest available)
-        model = genai.ImageGenerationModel("imagen-4.0-generate-001")
-        result = model.generate_images(
-            prompt=bark_prompt,
-            number_of_images=1,
-            safety_filter_level="block_few"
-        )
+        # Use new Gemini 2.5 Flash image generation API
+        model = genai.GenerativeModel("gemini-2.5-flash-image-preview")
         
-        if result.images:
+        response = model.generate_content([bark_prompt])
+        
+        # Extract image data from response
+        image_parts = [
+            part.inline_data.data
+            for part in response.candidates[0].content.parts
+            if part.inline_data
+        ]
+        
+        if image_parts:
             # Save the generated image
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"generated_bark_texture_{timestamp}.png"
             
-            result.images[0]._pil_image.save(filename)
+            image = Image.open(BytesIO(image_parts[0]))
+            image.save(filename)
             print(f"✅ Tree bark texture generated: {filename}")
             
             return filename
         else:
-            print("❌ No images generated")
+            print("❌ No image data in response")
             return None
             
     except Exception as e:
@@ -97,25 +102,30 @@ def generate_tree_leaf_texture():
     """
     
     try:
-        # Try to generate image using Imagen 4.0 (latest available)
-        model = genai.ImageGenerationModel("imagen-4.0-generate-001")
-        result = model.generate_images(
-            prompt=leaf_prompt,
-            number_of_images=1,
-            safety_filter_level="block_few"
-        )
+        # Use new Gemini 2.5 Flash image generation API
+        model = genai.GenerativeModel("gemini-2.5-flash-image-preview")
         
-        if result.images:
+        response = model.generate_content([leaf_prompt])
+        
+        # Extract image data from response
+        image_parts = [
+            part.inline_data.data
+            for part in response.candidates[0].content.parts
+            if part.inline_data
+        ]
+        
+        if image_parts:
             # Save the generated image
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"generated_leaf_texture_{timestamp}.png"
             
-            result.images[0]._pil_image.save(filename)
+            image = Image.open(BytesIO(image_parts[0]))
+            image.save(filename)
             print(f"✅ Tree leaf texture generated: {filename}")
             
             return filename
         else:
-            print("❌ No images generated")
+            print("❌ No image data in response")
             return None
             
     except Exception as e:

@@ -426,7 +426,7 @@ class World {
         
         console.log('✅ Multi-sphere tree canopy created with AI texture variations');
         
-        treeGroup.position.set(x, y, z);
+        treeGroup.position.set(x, 0, z); // Fixed: y=0 ensures tree base touches ground
         this.scene.add(treeGroup);
         this.decorations.push(treeGroup);
     }

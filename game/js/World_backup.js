@@ -306,20 +306,6 @@ class World {
             this.createTree(...pos);
         });
         
-        // Add more trees for richer forest environment
-        const extraTreePositions = [
-            [35, 2, 20], [55, 3, -25], [-35, 2, 18], 
-            [-25, 4, -22], [50, 5, 30], [-40, 3, -30],
-            [60, 2, 15], [-50, 4, 25], [40, 3, -35],
-            [25, 2, 35], [-30, 3, 30], [65, 4, -15]
-        ];
-        
-        extraTreePositions.forEach(pos => {
-            this.createTree(...pos);
-        });
-        
-        console.log('🌳 Created additional trees for richer forest environment');
-        
         // Floating clouds (background elements)
         for (let i = 0; i < 10; i++) {
             this.createCloud(
@@ -331,98 +317,118 @@ class World {
     }
     
     createTree(x, y, z) {
-        console.log('🌳 Creating believable tree: trunk + branches + canopies...');
+        console.log('🌳 TEXTURE STEP 3: Creating textured tree...');
         const treeGroup = new THREE.Group();
         const textureLoader = new THREE.TextureLoader();
         
-        // AI-Generated bark texture for all tree parts
-        const barkTexture = textureLoader.load(
+        // Professional bark texture (local PBR texture set)
+        const trunkTexture = textureLoader.load(
             './textures/gemini_bark.png',
-            () => console.log('✅ AI bark texture loaded for tree'),
+            () => console.log('✅ AI-generated bark texture loaded (Gemini)'),
             undefined,
-            () => console.warn('⚠️ Using brown fallback for bark')
+            () => {
+                console.warn('⚠️ Local bark texture failed, using procedural');
+                trunkMesh.material = this.createProceduralBarkTexture();
+            }
         );
-        barkTexture.wrapS = THREE.RepeatWrapping;
-        barkTexture.wrapT = THREE.RepeatWrapping;
-        barkTexture.repeat.set(1, 2);
         
-        const barkMaterial = new THREE.MeshLambertMaterial({ 
-            map: barkTexture,
+        // Load normal map for bark detail
+        const trunkNormalMap = textureLoader.load(
+            './textures/bark-normal.png',
+            () => console.log('✅ Bark normal map loaded'),
+            undefined,
+            () => console.warn('⚠️ Bark normal map failed')
+        );
+        trunkTexture.wrapS = THREE.RepeatWrapping;
+        trunkTexture.wrapT = THREE.RepeatWrapping;
+        trunkTexture.repeat.set(1, 2);
+        
+        const trunkGeometry = new THREE.CylinderGeometry(0.5, 0.8, 4, 8);
+        const trunkMaterial = new THREE.MeshLambertMaterial({ 
+            map: trunkTexture,
+            normalMap: trunkNormalMap, // Add normal map for detail
             color: 0x8B4513 
         });
-        
-        // MAIN TRUNK (properly grounded)
-        const trunkGeometry = new THREE.CylinderGeometry(0.5, 0.8, 4, 8);
-        const trunkMesh = new THREE.Mesh(trunkGeometry, barkMaterial);
-        trunkMesh.position.set(0, 2, 0); // Base at y=0 when tree at ground level
+        const trunkMesh = new THREE.Mesh(trunkGeometry, trunkMaterial);
+        trunkMesh.position.y = 2;
         trunkMesh.castShadow = true;
         treeGroup.add(trunkMesh);
         
-        // BRANCH 1 (extends from trunk)
-        const branch1Geometry = new THREE.CylinderGeometry(0.2, 0.35, 2.5, 6);
-        const branch1Mesh = new THREE.Mesh(branch1Geometry, barkMaterial);
-        branch1Mesh.position.set(-1.5, 3.5, 0.8);
-        branch1Mesh.rotation.z = Math.PI / 5; // Realistic branch angle
-        branch1Mesh.castShadow = true;
-        treeGroup.add(branch1Mesh);
-        
-        // BRANCH 2 (other side for balance)
-        const branch2Geometry = new THREE.CylinderGeometry(0.15, 0.28, 2, 6);
-        const branch2Mesh = new THREE.Mesh(branch2Geometry, barkMaterial);
-        branch2Mesh.position.set(1.2, 4, -0.6);
-        branch2Mesh.rotation.z = -Math.PI / 6; // Angled the other way
-        branch2Mesh.castShadow = true;
-        treeGroup.add(branch2Mesh);
-        
-        // SINGLE LEAF TEXTURE (small tiled - the good one)
-        const leafTexture = textureLoader.load(
-            './textures/leaves_variation_1_20250915_124330.png',
-            () => console.log('✅ Small tiled leaf texture loaded'),
+        // Professional leaf texture (local PBR texture set)
+        const leavesTexture = textureLoader.load(
+            './textures/gemini_leaves.png',
+            () => console.log('✅ AI-generated leaf texture loaded (Gemini)'),
             undefined,
             () => {
-                console.warn('⚠️ Using green fallback for leaves');
+                console.warn('⚠️ Local leaf texture failed, using procedural');
+                leavesMesh.material = this.createProceduralFoliageTexture();
             }
         );
-        leafTexture.wrapS = THREE.RepeatWrapping;
-        leafTexture.wrapT = THREE.RepeatWrapping;
-        leafTexture.repeat.set(4, 4); // More tiling for detail
         
-        const leafMaterial = new THREE.MeshLambertMaterial({ 
-            map: leafTexture,
-            color: 0x32CD32,
-            emissive: 0x0a1f0a
+        // Load leaf normal map for detail
+        const leavesNormalMap = textureLoader.load(
+            './textures/leaf-normal.png',
+            () => console.log('✅ Leaf normal map loaded'),
+            undefined,
+            () => console.warn('⚠️ Leaf normal map failed')
+        );
+        
+        // Load leaf alpha map for realistic edges
+        const leavesAlphaMap = textureLoader.load(
+            './textures/leaf-alpha.png',
+            () => console.log('✅ Leaf alpha map loaded'),
+            undefined,
+            () => console.warn('⚠️ Leaf alpha map failed')
+        );
+        leavesTexture.wrapS = THREE.RepeatWrapping;
+        leavesTexture.wrapT = THREE.RepeatWrapping;
+        leavesTexture.repeat.set(2, 2);
+        
+        // Multi-sphere foliage for organic tree shape (instead of single blob)
+        console.log('🌿 Creating multi-sphere tree canopy with AI texture variations...');
+        
+        // Create multiple spheres with varied sizes and positions
+        const foliageSpheres = [
+            { pos: [0, 5, 0], size: 2.2, variation: 1 },      // Main canopy
+            { pos: [-1, 4.5, 0.5], size: 1.8, variation: 2 }, // Left cluster
+            { pos: [1, 4.8, -0.3], size: 1.9, variation: 3 }, // Right cluster
+            { pos: [0.2, 5.8, 0.2], size: 1.5, variation: 4 }, // Top cluster
+            { pos: [-0.5, 4.2, -0.8], size: 1.6, variation: 1 } // Back cluster
+        ];
+        
+        foliageSpheres.forEach((sphere, index) => {
+            const sphereGeometry = new THREE.SphereGeometry(sphere.size, 12, 8);
+            
+            // Use different AI-generated leaf variations for visual diversity
+            const variationTexture = textureLoader.load(
+                `./textures/leaves_variation_${sphere.variation}_20250915_124${330 + (sphere.variation - 1) * 7}.png`,
+                () => console.log(`✅ AI leaf variation ${sphere.variation} loaded`),
+                undefined,
+                () => {
+                    console.warn(`⚠️ Leaf variation ${sphere.variation} failed, using main texture`);
+                }
+            );
+            
+            const sphereMaterial = new THREE.MeshLambertMaterial({ 
+                map: variationTexture,
+                color: 0x32CD32,
+                emissive: 0x0a1f0a,
+                transparent: true
+            });
+            
+            const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            sphereMesh.position.set(...sphere.pos);
+            sphereMesh.castShadow = true;
+            sphereMesh.receiveShadow = true;
+            
+            treeGroup.add(sphereMesh);
         });
         
-        // MAIN CANOPY (on trunk)
-        const mainCanopy = new THREE.SphereGeometry(2.4, 12, 8);
-        const mainCanopyMesh = new THREE.Mesh(mainCanopy, leafMaterial);
-        mainCanopyMesh.position.set(0, 5.8, 0);
-        mainCanopyMesh.castShadow = true;
-        mainCanopyMesh.receiveShadow = true;
-        treeGroup.add(mainCanopyMesh);
+        console.log('✅ Multi-sphere tree canopy created with AI texture variations');
         
-        // BRANCH 1 CANOPY (smaller, at end of branch)
-        const branch1Canopy = new THREE.SphereGeometry(1.3, 10, 6);
-        const branch1CanopyMesh = new THREE.Mesh(branch1Canopy, leafMaterial);
-        branch1CanopyMesh.position.set(-2.3, 4.5, 1.2);
-        branch1CanopyMesh.castShadow = true;
-        branch1CanopyMesh.receiveShadow = true;
-        treeGroup.add(branch1CanopyMesh);
-        
-        // BRANCH 2 CANOPY (smallest, at end of second branch)
-        const branch2Canopy = new THREE.SphereGeometry(1.1, 8, 6);
-        const branch2CanopyMesh = new THREE.Mesh(branch2Canopy, leafMaterial);
-        branch2CanopyMesh.position.set(1.8, 4.8, -0.9);
-        branch2CanopyMesh.castShadow = true;
-        branch2CanopyMesh.receiveShadow = true;
-        treeGroup.add(branch2CanopyMesh);
-        
-        // Position entire tree on ground
-        treeGroup.position.set(x, 0, z); // Grounded properly
+        treeGroup.position.set(x, 0, z); // Fixed: y=0 ensures tree base touches ground
         this.scene.add(treeGroup);
         this.decorations.push(treeGroup);
-        
-        console.log('✅ Believable tree created: 1 trunk + 2 branches + 3 canopies with consistent AI leaf texture');
     }
     
     createCloud(x, y, z) {

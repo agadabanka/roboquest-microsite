@@ -207,7 +207,8 @@ class Player {
         this.handleInput(deltaTime);
         this.updatePhysics(deltaTime); // Re-enabled with physics-free version
         this.updateAnimations(deltaTime);
-        this.updateCamera(deltaTime);
+        // Camera is now handled by CameraController in GameLogic
+        // this.updateCamera(deltaTime);
         this.updateHUD();
         
         // Sync visual mesh with physics body (Step 6: Physics movement)

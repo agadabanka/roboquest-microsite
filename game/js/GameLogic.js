@@ -12,6 +12,7 @@ class GameLogic {
         // Game objects
         this.player = null;
         this.worldManager = null;
+        this.cameraController = null;
         
         // Game state
         this.gameState = 'playing'; // playing, paused, gameOver, levelComplete
@@ -31,6 +32,10 @@ class GameLogic {
         
         // Create player
         this.player = new Player(this.gameEngine);
+        
+        // Create 3rd person camera controller
+        this.cameraController = new CameraController(this.gameEngine.camera, this.player);
+        console.log('📷 3rd person camera controller created');
         
         // Initialize audio (basic web audio for effects)
         this.initAudio();
@@ -55,6 +60,11 @@ class GameLogic {
         // Update game objects
         if (this.player) {
             this.player.update(deltaTime);
+        }
+        
+        // Update camera controller
+        if (this.cameraController) {
+            this.cameraController.update(deltaTime);
         }
         
         if (this.worldManager) {

@@ -234,9 +234,20 @@ class Player {
     }
     
     handleInput(deltaTime) {
-        // Step 6: Physics-based movement 
+        // Physics-based movement aligned to camera (WASD relative to camera)
         const force = new CANNON.Vec3();
         let isMoving = false;
+        
+        // Compute camera-relative basis vectors
+        const camForwardThree = new THREE.Vector3();
+        this.gameEngine.camera.getWorldDirection(camForwardThree);
+        camForwardThree.y = 0;
+        camForwardThree.normalize();
+        const camRightThree = new THREE.Vector3().crossVectors(camForwardThree, new THREE.Vector3(0, 1, 0)).normalize();
+        
+        // Accumulate input in camera space
+        let moveX = 0;
+        let moveZ = 0;
         
         // Debug input every 60 frames (1 second) to avoid spam
         if (Math.floor(Date.now() / 1000) % 2 === 0 && Math.random() < 0.02) {
@@ -251,45 +262,68 @@ class Player {
         
         // Physics-based movement (Step 6: Final movement system)
         if (this.gameEngine.isKeyPressed('KeyW') || this.gameEngine.isKeyPressed('ArrowUp')) {
-            force.z -= this.moveSpeed;
+            moveZ += 1; // forward
             isMoving = true;
         }
         if (this.gameEngine.isKeyPressed('KeyS') || this.gameEngine.isKeyPressed('ArrowDown')) {
-            force.z += this.moveSpeed;
+            moveZ -= 1; // backward
             isMoving = true;
         }
         if (this.gameEngine.isKeyPressed('KeyA') || this.gameEngine.isKeyPressed('ArrowLeft')) {
-            force.x -= this.moveSpeed;
+            moveX -= 1; // left
             isMoving = true;
         }
         if (this.gameEngine.isKeyPressed('KeyD') || this.gameEngine.isKeyPressed('ArrowRight')) {
-            force.x += this.moveSpeed;
+            moveX += 1; // right
             isMoving = true;
         }
         
-        // Apply movement force to physics body with debugging
-        if (isMoving && this.physicsBody) {
-            // Try direct velocity instead of forces (might work better)
-            this.physicsBody.velocity.x = force.x * 2; // Direct velocity control
-            this.physicsBody.velocity.z = force.z * 2;
-            
-            // Also apply forces for additional effect
-            this.physicsBody.force.x += force.x;
-            this.physicsBody.force.z += force.z;
-            this.animationState = 'walking';
-            
+        // Build movement vector in world space from camera basis
+        const moveDirThree = new THREE.Vector3();
+        if (isMoving) {
+            moveDirThree.addScaledVector(camForwardThree, moveZ);
+            moveDirThree.addScaledVector(camRightThree, moveX);
+            if (moveDirThree.lengthSq() > 0) moveDirThree.normalize();
+        }
+        
+        // Apply movement to physics body with damping when idle
+        if (this.physicsBody) {
+            if (isMoving) {
+                // Desired velocity in xz plane
+                const desiredVX = moveDirThree.x * this.moveSpeed;
+                const desiredVZ = moveDirThree.z * this.moveSpeed;
+                
+                // Set velocity directly for responsive controls
+                this.physicsBody.velocity.x = desiredVX;
+                this.physicsBody.velocity.z = desiredVZ;
+                
+                // Small assisting force helps overcome friction hiccups
+                this.physicsBody.force.x += desiredVX * 0.5;
+                this.physicsBody.force.z += desiredVZ * 0.5;
+                this.animationState = 'walking';
+                
+                // Rotate visual to face movement direction
+                const facing = Math.atan2(moveDirThree.x, moveDirThree.z);
+                this.mesh.rotation.y = facing;
+            } else {
+                // Apply gentle damping to stop sliding
+                this.physicsBody.velocity.x *= 0.85;
+                this.physicsBody.velocity.z *= 0.85;
+                this.animationState = 'idle';
+            }
+
             // More frequent debugging
             if (Math.random() < 0.05) {
                 console.log('🚀 Movement Debug:', {
-                    inputForce: {x: force.x, z: force.z},
-                    setVelocity: {x: force.x * 2, z: force.z * 2},
+                    camForward: {x: camForwardThree.x.toFixed(2), z: camForwardThree.z.toFixed(2)},
+                    camRight: {x: camRightThree.x.toFixed(2), z: camRightThree.z.toFixed(2)},
+                    moveDir: {x: moveDirThree.x.toFixed(2), z: moveDirThree.z.toFixed(2)},
+                    desiredVelocity: this.physicsBody ? {x: this.physicsBody.velocity.x.toFixed(2), z: this.physicsBody.velocity.z.toFixed(2)} : null,
                     actualVelocity: {x: this.physicsBody.velocity.x, z: this.physicsBody.velocity.z},
                     physicsPos: {x: this.physicsBody.position.x, z: this.physicsBody.position.z},
                     meshPos: {x: this.mesh.position.x, z: this.mesh.position.z}
                 });
             }
-        } else {
-            this.animationState = 'idle';
         }
         
         // Jumping (Space key)

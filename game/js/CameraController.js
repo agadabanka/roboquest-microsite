@@ -38,7 +38,8 @@ class CameraController {
     setupEventListeners() {
         // Mouse down/up events
         document.addEventListener('mousedown', (event) => {
-            if (event.button === 0) { // Left click
+            // Support left OR right click to orbit (tests use left click)
+            if (event.button === 0 || event.button === 2) {
                 this.isMouseDown = true;
                 this.previousMouseX = event.clientX;
                 this.previousMouseY = event.clientY;
@@ -47,7 +48,7 @@ class CameraController {
         });
         
         document.addEventListener('mouseup', (event) => {
-            if (event.button === 0) {
+            if (event.button === 0 || event.button === 2) {
                 this.isMouseDown = false;
                 document.body.style.cursor = 'default';
             }

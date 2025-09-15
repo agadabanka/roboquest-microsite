@@ -21,10 +21,12 @@ class Player {
         this.coins = 0;
         this.lives = 3;
         
-        // Movement parameters (tuned to industry standard)
-        this.moveSpeed = 20; // 20 units/second - industry standard for platformers
-        this.jumpForce = 15; // Keep jump as is - feels right
-        this.hoverForce = 8;
+        // Movement parameters (tuned for fluid feel)
+        this.moveSpeed = 28; // Faster, fluid traversal
+        this.jumpForce = 10; // Lower, smoother jump arc
+        this.hoverForce = 6; // Softer hover assist
+        this.accelLerp = 0.2; // Velocity smoothing factor per frame
+        this.turnLerp = 0.2;  // Rotation smoothing factor per frame
         this.maxHoverTime = 1.0; // 1 second hover like Astro Bot
         this.currentHoverTime = 0;
         this.isHovering = false;
@@ -293,22 +295,28 @@ class Player {
                 const desiredVX = moveDirThree.x * this.moveSpeed;
                 const desiredVZ = moveDirThree.z * this.moveSpeed;
                 
-                // Set velocity directly for responsive controls
-                this.physicsBody.velocity.x = desiredVX;
-                this.physicsBody.velocity.z = desiredVZ;
+                // Smooth velocity towards desired for fluid feel
+                this.physicsBody.velocity.x = THREE.MathUtils.lerp(
+                    this.physicsBody.velocity.x, desiredVX, this.accelLerp
+                );
+                this.physicsBody.velocity.z = THREE.MathUtils.lerp(
+                    this.physicsBody.velocity.z, desiredVZ, this.accelLerp
+                );
                 
                 // Small assisting force helps overcome friction hiccups
                 this.physicsBody.force.x += desiredVX * 0.5;
                 this.physicsBody.force.z += desiredVZ * 0.5;
                 this.animationState = 'walking';
                 
-                // Rotate visual to face movement direction
-                const facing = Math.atan2(moveDirThree.x, moveDirThree.z);
-                this.mesh.rotation.y = facing;
+                // Rotate visual to face movement direction (smoothed)
+                const targetYaw = Math.atan2(moveDirThree.x, moveDirThree.z);
+                this.mesh.rotation.y = THREE.MathUtils.lerpAngle(
+                    this.mesh.rotation.y, targetYaw, this.turnLerp
+                );
             } else {
                 // Apply gentle damping to stop sliding
-                this.physicsBody.velocity.x *= 0.85;
-                this.physicsBody.velocity.z *= 0.85;
+                this.physicsBody.velocity.x *= 0.90;
+                this.physicsBody.velocity.z *= 0.90;
                 this.animationState = 'idle';
             }
 
@@ -323,6 +331,20 @@ class Player {
                     physicsPos: {x: this.physicsBody.position.x, z: this.physicsBody.position.z},
                     meshPos: {x: this.mesh.position.x, z: this.mesh.position.z}
                 });
+            }
+        }
+
+        // If not moving, align character to camera forward when orbiting with mouse
+        if (!isMoving) {
+            const cam = this.gameEngine.camera;
+            if (cam && window.gameLogic && window.gameLogic.cameraController && window.gameLogic.cameraController.isMouseDown) {
+                const camForward = new THREE.Vector3();
+                cam.getWorldDirection(camForward);
+                camForward.y = 0; camForward.normalize();
+                const camYaw = Math.atan2(camForward.x, camForward.z);
+                this.mesh.rotation.y = THREE.MathUtils.lerpAngle(
+                    this.mesh.rotation.y, camYaw, this.turnLerp
+                );
             }
         }
         

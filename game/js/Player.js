@@ -212,8 +212,23 @@ class Player {
         
         // Sync visual mesh with physics body (Step 6: Physics movement)
         if (this.physicsBody) {
+            // Debug the sync issue
+            if (Math.random() < 0.01) {
+                console.log('🔄 Syncing positions:', {
+                    physicsPosX: this.physicsBody.position.x,
+                    physicsPosZ: this.physicsBody.position.z,
+                    meshPosX: this.mesh.position.x,
+                    meshPosZ: this.mesh.position.z
+                });
+            }
+            
             this.mesh.position.copy(this.physicsBody.position);
             this.mesh.quaternion.copy(this.physicsBody.quaternion);
+            
+            // Force immediate sync verification
+            if (Math.abs(this.physicsBody.position.x - this.mesh.position.x) > 0.1) {
+                console.warn('⚠️ Position sync mismatch detected!');
+            }
         }
     }
     
@@ -253,18 +268,23 @@ class Player {
         
         // Apply movement force to physics body with debugging
         if (isMoving && this.physicsBody) {
+            // Try direct velocity instead of forces (might work better)
+            this.physicsBody.velocity.x = force.x * 2; // Direct velocity control
+            this.physicsBody.velocity.z = force.z * 2;
+            
+            // Also apply forces for additional effect
             this.physicsBody.force.x += force.x;
             this.physicsBody.force.z += force.z;
             this.animationState = 'walking';
             
-            // Debug grounding and forces
-            if (Math.random() < 0.02) { // Regular debug
+            // More frequent debugging
+            if (Math.random() < 0.05) {
                 console.log('🚀 Movement Debug:', {
-                    force: {x: force.x, z: force.z},
-                    velocity: {x: this.physicsBody.velocity.x, z: this.physicsBody.velocity.z},
-                    position: {x: this.mesh.position.x, z: this.mesh.position.z},
-                    isGrounded: this.isGrounded,
-                    onGround: this.physicsBody.position.y < 3
+                    inputForce: {x: force.x, z: force.z},
+                    setVelocity: {x: force.x * 2, z: force.z * 2},
+                    actualVelocity: {x: this.physicsBody.velocity.x, z: this.physicsBody.velocity.z},
+                    physicsPos: {x: this.physicsBody.position.x, z: this.physicsBody.position.z},
+                    meshPos: {x: this.mesh.position.x, z: this.mesh.position.z}
                 });
             }
         } else {

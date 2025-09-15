@@ -8,7 +8,7 @@ class GameEngine {
         this.scene = null;
         this.camera = null;
         this.renderer = null;
-        this.world = null; // Physics world
+        this.world = null; // Physics world (disabled for initial testing)
         this.clock = new THREE.Clock();
         
         // Game state
@@ -26,7 +26,7 @@ class GameEngine {
         this.createScene();
         this.createRenderer();
         this.createCamera();
-        this.createPhysicsWorld();
+        // this.createPhysicsWorld(); // Disabled for initial testing
         this.setupLighting();
         this.setupEventListeners();
         this.hideLoading();
@@ -190,8 +190,8 @@ class GameEngine {
         
         const deltaTime = this.clock.getDelta();
         
-        // Update physics world
-        this.world.step(deltaTime);
+        // Update physics world (disabled for initial testing)
+        // this.world.step(deltaTime);
         
         // Update game objects (will be called by game logic)
         if (window.gameLogic) {

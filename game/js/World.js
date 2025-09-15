@@ -88,12 +88,12 @@ class World {
         
         this.scene.add(groundMesh);
         
-        // Physics ground
-        const groundShape = new CANNON.Box(new CANNON.Vec3(100, 0.1, 100));
-        const groundBody = new CANNON.Body({ mass: 0 });
-        groundBody.addShape(groundShape);
-        groundBody.position.set(0, 0, 0);
-        this.world.add(groundBody);
+        // Physics ground (disabled for initial testing)
+        // const groundShape = new CANNON.Box(new CANNON.Vec3(100, 0.1, 100));
+        // const groundBody = new CANNON.Body({ mass: 0 });
+        // groundBody.addShape(groundShape);
+        // groundBody.position.set(0, 0, 0);
+        // this.world.add(groundBody);
     }
     
     createStartingArea() {
@@ -148,16 +148,16 @@ class World {
         
         this.scene.add(mesh);
         
-        // Physics body
-        const shape = new CANNON.Box(new CANNON.Vec3(width/2, height/2, depth/2));
-        const body = new CANNON.Body({ mass: 0 }); // Static platforms
-        body.addShape(shape);
-        body.position.set(x, y, z);
-        this.world.add(body);
+        // Physics body (disabled for initial testing)
+        // const shape = new CANNON.Box(new CANNON.Vec3(width/2, height/2, depth/2));
+        // const body = new CANNON.Body({ mass: 0 }); // Static platforms
+        // body.addShape(shape);
+        // body.position.set(x, y, z);
+        // this.world.add(body);
         
-        this.platforms.push({ mesh, body });
+        this.platforms.push({ mesh, body: null });
         
-        return { mesh, body };
+        return { mesh, body: null };
     }
     
     createMovingPlatform(x, y, z, width, height, depth) {
@@ -220,14 +220,14 @@ class World {
         
         this.scene.add(mesh);
         
-        // Physics body (trigger)
-        const shape = new CANNON.Cylinder(0.8, 0.8, 0.2, 8);
-        const body = new CANNON.Body({ mass: 0, isTrigger: true });
-        body.addShape(shape);
-        body.position.set(x, y, z);
-        this.world.add(body);
+        // Physics body (trigger) - disabled for initial testing
+        // const shape = new CANNON.Cylinder(0.8, 0.8, 0.2, 8);
+        // const body = new CANNON.Body({ mass: 0, isTrigger: true });
+        // body.addShape(shape);
+        // body.position.set(x, y, z);
+        // this.world.add(body);
         
-        this.collectibles.push({ mesh, body });
+        this.collectibles.push({ mesh, body: null });
     }
     
     createGem(x, y, z) {
@@ -248,14 +248,14 @@ class World {
         
         this.scene.add(mesh);
         
-        // Physics body (trigger)
-        const shape = new CANNON.Sphere(1);
-        const body = new CANNON.Body({ mass: 0, isTrigger: true });
-        body.addShape(shape);
-        body.position.set(x, y, z);
-        this.world.add(body);
+        // Physics body (trigger) - disabled for initial testing
+        // const shape = new CANNON.Sphere(1);
+        // const body = new CANNON.Body({ mass: 0, isTrigger: true });
+        // body.addShape(shape);
+        // body.position.set(x, y, z);
+        // this.world.add(body);
         
-        this.collectibles.push({ mesh, body });
+        this.collectibles.push({ mesh, body: null });
     }
     
     createDecorations() {
@@ -354,13 +354,14 @@ class World {
             { pos: [-worldSize/2, wallHeight/2, 0], size: [wallThickness, wallHeight, worldSize] }
         ];
         
-        boundaries.forEach(boundary => {
-            const shape = new CANNON.Box(new CANNON.Vec3(...boundary.size.map(s => s/2)));
-            const body = new CANNON.Body({ mass: 0 });
-            body.addShape(shape);
-            body.position.set(...boundary.pos);
-            this.world.add(body);
-        });
+        // Physics boundaries disabled for initial testing
+        // boundaries.forEach(boundary => {
+        //     const shape = new CANNON.Box(new CANNON.Vec3(...boundary.size.map(s => s/2)));
+        //     const body = new CANNON.Body({ mass: 0 });
+        //     body.addShape(shape);
+        //     body.position.set(...boundary.pos);
+        //     this.world.add(body);
+        // });
     }
     
     update(deltaTime) {

@@ -31,7 +31,7 @@ class Player {
         
         // Create visual and physics representation
         this.createPlayerMesh();
-        this.createPhysicsBody();
+        // this.createPhysicsBody(); // Disabled for initial testing
         this.setupAnimations();
     }
     
@@ -39,8 +39,8 @@ class Player {
         // Create robot character (Astro Bot inspired but unique)
         const robotGroup = new THREE.Group();
         
-        // Main body (white robot like Astro Bot)
-        const bodyGeometry = new THREE.CapsuleGeometry(0.8, 1.2, 4, 8);
+        // Main body (white robot like Astro Bot) - using CylinderGeometry for r128 compatibility
+        const bodyGeometry = new THREE.CylinderGeometry(0.8, 0.8, 1.2, 8);
         const bodyMaterial = new THREE.MeshLambertMaterial({ 
             color: 0xffffff,
             emissive: 0x111111

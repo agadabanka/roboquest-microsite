@@ -11,14 +11,27 @@ let isGameInitialized = false;
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🤖 Starting RoboQuest...');
     
-    // Wait for Three.js and Cannon.js to load
-    if (typeof THREE === 'undefined' || typeof CANNON === 'undefined') {
-        console.error('❌ Three.js or Cannon.js not loaded!');
-        return;
-    }
-    
-    // Initialize game systems
-    initializeGame();
+    // Wait a moment for CDN libraries to load
+    setTimeout(() => {
+        if (typeof THREE === 'undefined') {
+            console.error('❌ Three.js or Cannon.js not loaded!');
+            console.log('🔄 Retrying library check...');
+            
+            // Retry after a longer delay
+            setTimeout(() => {
+                if (typeof THREE === 'undefined') {
+                    console.error('❌ Final attempt failed - libraries not available');
+                    document.getElementById('loading').innerHTML = '<div class="loading-spinner"></div><div>Failed to load 3D libraries. Please refresh.</div>';
+                    return;
+                }
+                initializeGame();
+            }, 2000);
+            return;
+        }
+        
+        console.log('✅ Libraries loaded successfully');
+        initializeGame();
+    }, 1000);
 });
 
 function initializeGame() {

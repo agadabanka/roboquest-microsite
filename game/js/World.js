@@ -21,22 +21,15 @@ class World {
     }
     
     createMaterials() {
+        console.log('🎨 TEXTURE STEP 2: Creating textured platform materials...');
+        
+        const textureLoader = new THREE.TextureLoader();
+        
         return {
-            // Platform materials (colorful like Astro Bot)
-            platform: new THREE.MeshLambertMaterial({ 
-                color: 0x50E3C2, // Cyan platforms
-                emissive: 0x0a1f1c
-            }),
-            
-            platformAlt: new THREE.MeshLambertMaterial({ 
-                color: 0xF5A623, // Orange platforms
-                emissive: 0x1f1508
-            }),
-            
-            platformSpecial: new THREE.MeshLambertMaterial({ 
-                color: 0xFF6B9D, // Pink special platforms
-                emissive: 0x1f0d15
-            }),
+            // Platform materials with textures (Astro Bot style)
+            platform: this.createTexturedPlatformMaterial(textureLoader, 0x50E3C2, 'cyan'),
+            platformAlt: this.createTexturedPlatformMaterial(textureLoader, 0xF5A623, 'orange'),
+            platformSpecial: this.createTexturedPlatformMaterial(textureLoader, 0xFF6B9D, 'pink'),
             
             // Collectible materials
             coin: new THREE.MeshLambertMaterial({ 
@@ -79,16 +72,44 @@ class World {
     }
     
     createGround() {
-        // Main ground plane
+        console.log('🎨 TEXTURE STEP 1: Creating textured ground...');
+        
+        // Create textured ground material
+        const textureLoader = new THREE.TextureLoader();
+        
+        // Load grass texture from web (free texture)
+        const grassTexture = textureLoader.load(
+            'https://threejs.org/examples/textures/terrain/grasslight-big.jpg',
+            () => console.log('✅ Grass texture loaded successfully'),
+            undefined,
+            (error) => {
+                console.warn('⚠️ Grass texture failed, using fallback');
+                // Create procedural grass-like texture as fallback
+                groundMesh.material = this.createProceduralGrassTexture();
+            }
+        );
+        
+        // Configure texture for tiling
+        grassTexture.wrapS = THREE.RepeatWrapping;
+        grassTexture.wrapT = THREE.RepeatWrapping;
+        grassTexture.repeat.set(20, 20); // Tile 20x20 times for detail
+        
+        // Create textured material
+        const groundMaterial = new THREE.MeshLambertMaterial({
+            map: grassTexture,
+            color: 0x90EE90, // Light green tint
+        });
+        
+        // Main ground plane with texture
         const groundGeometry = new THREE.PlaneGeometry(200, 200);
-        const groundMesh = new THREE.Mesh(groundGeometry, this.materials.ground);
+        const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
         groundMesh.rotation.x = -Math.PI / 2;
         groundMesh.position.y = 0;
         groundMesh.receiveShadow = true;
         
         this.scene.add(groundMesh);
         
-        console.log('🌍 Ground plane created and added to scene');
+        console.log('🌍 Textured ground plane created and added to scene');
         console.log('📍 Ground position:', groundMesh.position);
         
         // Physics ground (re-enabled with working Cannon.js v0.6.2)
@@ -296,23 +317,49 @@ class World {
     }
     
     createTree(x, y, z) {
+        console.log('🌳 TEXTURE STEP 3: Creating textured tree...');
         const treeGroup = new THREE.Group();
+        const textureLoader = new THREE.TextureLoader();
         
-        // Trunk
+        // Textured trunk (bark texture)
+        const trunkTexture = textureLoader.load(
+            'https://threejs.org/examples/textures/terrain/grass_dirt_diffuse.jpg',
+            () => console.log('✅ Bark texture loaded'),
+            undefined,
+            () => console.warn('⚠️ Bark texture failed, using brown')
+        );
+        trunkTexture.wrapS = THREE.RepeatWrapping;
+        trunkTexture.wrapT = THREE.RepeatWrapping;
+        trunkTexture.repeat.set(1, 2);
+        
         const trunkGeometry = new THREE.CylinderGeometry(0.5, 0.8, 4, 8);
-        const trunkMesh = new THREE.Mesh(trunkGeometry, 
-            new THREE.MeshLambertMaterial({ color: 0x8B4513 }));
+        const trunkMaterial = new THREE.MeshLambertMaterial({ 
+            map: trunkTexture,
+            color: 0x8B4513 
+        });
+        const trunkMesh = new THREE.Mesh(trunkGeometry, trunkMaterial);
         trunkMesh.position.y = 2;
         trunkMesh.castShadow = true;
         treeGroup.add(trunkMesh);
         
-        // Leaves (colorful like Astro Bot)
+        // Leaves with more organic texture (inspired by Astro Bot coral trees)
+        const leavesTexture = textureLoader.load(
+            'https://threejs.org/examples/textures/terrain/cliff_diffuse.jpg',
+            () => console.log('✅ Leaves texture loaded'),
+            undefined,
+            () => console.warn('⚠️ Leaves texture failed, using green')
+        );
+        leavesTexture.wrapS = THREE.RepeatWrapping;
+        leavesTexture.wrapT = THREE.RepeatWrapping;
+        leavesTexture.repeat.set(2, 2);
+        
         const leavesGeometry = new THREE.SphereGeometry(2.5, 12, 8);
-        const leavesMesh = new THREE.Mesh(leavesGeometry, 
-            new THREE.MeshLambertMaterial({ 
-                color: 0x32CD32,
-                emissive: 0x0a1f0a
-            }));
+        const leavesMaterial = new THREE.MeshLambertMaterial({ 
+            map: leavesTexture,
+            color: 0x32CD32,
+            emissive: 0x0a1f0a
+        });
+        const leavesMesh = new THREE.Mesh(leavesGeometry, leavesMaterial);
         leavesMesh.position.y = 5;
         leavesMesh.castShadow = true;
         leavesMesh.receiveShadow = true;
@@ -474,6 +521,108 @@ class World {
         });
         
         return collected;
+    }
+    
+    // Procedural texture creation for fallbacks
+    createProceduralGrassTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+        
+        // Create grass-like texture
+        const gradient = ctx.createLinearGradient(0, 0, 0, 256);
+        gradient.addColorStop(0, '#90EE90');
+        gradient.addColorStop(0.5, '#228B22');
+        gradient.addColorStop(1, '#006400');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 256, 256);
+        
+        // Add grass blade details
+        ctx.strokeStyle = '#32CD32';
+        ctx.lineWidth = 1;
+        
+        for (let i = 0; i < 100; i++) {
+            const x = Math.random() * 256;
+            const y = Math.random() * 256;
+            const height = Math.random() * 20 + 10;
+            
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + Math.random() * 4 - 2, y - height);
+            ctx.stroke();
+        }
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(20, 20);
+        
+        console.log('🎨 Created procedural grass texture');
+        return new THREE.MeshLambertMaterial({ map: texture });
+    }
+    
+    // Create textured platform materials
+    createTexturedPlatformMaterial(textureLoader, baseColor, colorName) {
+        // Try to load platform texture from web
+        const platformTexture = textureLoader.load(
+            'https://threejs.org/examples/textures/brick_diffuse.jpg',
+            () => console.log(`✅ Platform texture loaded for ${colorName} platform`),
+            undefined,
+            (error) => {
+                console.warn(`⚠️ Platform texture failed for ${colorName}, using procedural`);
+                return this.createProceduralPlatformTexture(baseColor);
+            }
+        );
+        
+        // Configure texture
+        platformTexture.wrapS = THREE.RepeatWrapping;
+        platformTexture.wrapT = THREE.RepeatWrapping;
+        platformTexture.repeat.set(2, 2); // Smaller tiling for platform detail
+        
+        return new THREE.MeshLambertMaterial({
+            map: platformTexture,
+            color: baseColor, // Tint the texture with platform color
+            emissive: new THREE.Color(baseColor).multiplyScalar(0.1)
+        });
+    }
+    
+    // Procedural platform texture as fallback
+    createProceduralPlatformTexture(baseColor) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 128;
+        canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        
+        // Create brick-like pattern
+        ctx.fillStyle = `#${baseColor.toString(16).padStart(6, '0')}`;
+        ctx.fillRect(0, 0, 128, 128);
+        
+        // Add brick lines
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 2;
+        
+        for (let y = 0; y < 128; y += 32) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(128, y);
+            ctx.stroke();
+        }
+        
+        for (let x = 0; x < 128; x += 64) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, 128);
+            ctx.stroke();
+        }
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        
+        console.log(`🎨 Created procedural platform texture for color ${baseColor}`);
+        return new THREE.MeshLambertMaterial({ map: texture });
     }
     
     // Dynamic world generation (for future expansion)

@@ -79,6 +79,9 @@ class GameEngine {
         
         console.log('📷 Camera positioned at:', this.camera.position);
         console.log('📷 Camera looking at: 0, 0, 0');
+        
+        // Add debug grid for movement visualization
+        this.addDebugGrid();
     }
     
     createPhysicsWorld() {
@@ -96,10 +99,12 @@ class GameEngine {
             defaultMaterial,
             playerMaterial,
             {
-                friction: 0.8,
+                friction: 0.1, // Much lower friction for better movement
                 restitution: 0.0 // No bouncing
             }
         );
+        
+        console.log('🔧 Physics contact material: friction=0.1 (low for smooth movement)');
         
         this.world.addContactMaterial(defaultContactMaterial);
     }
@@ -275,6 +280,52 @@ class GameEngine {
     addGridHelper(size = 100, divisions = 50) {
         const gridHelper = new THREE.GridHelper(size, divisions);
         this.scene.add(gridHelper);
+    }
+    
+    addDebugGrid() {
+        console.log('📐 Adding debug grid for movement visualization...');
+        
+        // Create visible grid overlay for movement debugging
+        const gridSize = 80;
+        const squareSize = 4; // 4x4 unit squares for clear movement visualization
+        const divisions = gridSize / squareSize;
+        
+        // Main grid helper
+        const gridHelper = new THREE.GridHelper(gridSize, divisions, 0x444444, 0x888888);
+        gridHelper.position.y = 0.1; // Slightly above ground
+        this.scene.add(gridHelper);
+        
+        // Add coordinate labels at key positions
+        const loader = new THREE.FontLoader();
+        
+        // Create numbered grid markers for easy reference
+        for (let x = -20; x <= 20; x += squareSize) {
+            for (let z = -20; z <= 20; z += squareSize) {
+                if (x % 8 === 0 && z % 8 === 0) { // Every 2 squares
+                    const markerGeometry = new THREE.SphereGeometry(0.2, 8, 8);
+                    const markerMaterial = new THREE.MeshBasicMaterial({ 
+                        color: 0xff0000,
+                        transparent: true,
+                        opacity: 0.7
+                    });
+                    const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+                    marker.position.set(x, 0.5, z);
+                    this.scene.add(marker);
+                }
+            }
+        }
+        
+        // Add center marker (player start position)
+        const centerMarker = new THREE.Mesh(
+            new THREE.CylinderGeometry(1, 1, 0.2, 8),
+            new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.8 })
+        );
+        centerMarker.position.set(0, 0.2, 0);
+        this.scene.add(centerMarker);
+        
+        console.log('✅ Debug grid added - 4x4 unit squares for movement tracking');
+        console.log('🎯 Green cylinder marks starting position (0,0)');
+        console.log('🔴 Red spheres mark major grid intersections');
     }
     
     // Game state management

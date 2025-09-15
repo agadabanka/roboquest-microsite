@@ -251,13 +251,21 @@ class Player {
             isMoving = true;
         }
         
-        // Apply movement force to physics body
+        // Apply movement force to physics body with debugging
         if (isMoving && this.physicsBody) {
             this.physicsBody.force.x += force.x;
             this.physicsBody.force.z += force.z;
             this.animationState = 'walking';
-            if (Math.random() < 0.01) { // Occasional debug
-                console.log('🚀 Applying physics force:', force);
+            
+            // Debug grounding and forces
+            if (Math.random() < 0.02) { // Regular debug
+                console.log('🚀 Movement Debug:', {
+                    force: {x: force.x, z: force.z},
+                    velocity: {x: this.physicsBody.velocity.x, z: this.physicsBody.velocity.z},
+                    position: {x: this.mesh.position.x, z: this.mesh.position.z},
+                    isGrounded: this.isGrounded,
+                    onGround: this.physicsBody.position.y < 3
+                });
             }
         } else {
             this.animationState = 'idle';

@@ -210,26 +210,41 @@ class Player {
     }
     
     handleInput(deltaTime) {
-        // Physics-free movement for initial testing
+        // Physics-free movement for initial testing  
         let isMoving = false;
         const moveSpeed = 0.1;
+        
+        // Debug input every 60 frames (1 second) to avoid spam
+        if (Math.floor(Date.now() / 1000) % 2 === 0 && Math.random() < 0.02) {
+            console.log('🎮 Input check - Keys pressed:', {
+                W: this.gameEngine.isKeyPressed('KeyW'),
+                A: this.gameEngine.isKeyPressed('KeyA'), 
+                S: this.gameEngine.isKeyPressed('KeyS'),
+                D: this.gameEngine.isKeyPressed('KeyD'),
+                Space: this.gameEngine.isKeyPressed('Space')
+            });
+        }
         
         // Direct mesh movement (physics-free)
         if (this.gameEngine.isKeyPressed('KeyW') || this.gameEngine.isKeyPressed('ArrowUp')) {
             this.mesh.position.z -= moveSpeed;
             isMoving = true;
+            console.log('⬆️ Moving forward, new Z:', this.mesh.position.z);
         }
         if (this.gameEngine.isKeyPressed('KeyS') || this.gameEngine.isKeyPressed('ArrowDown')) {
             this.mesh.position.z += moveSpeed;
             isMoving = true;
+            console.log('⬇️ Moving backward, new Z:', this.mesh.position.z);
         }
         if (this.gameEngine.isKeyPressed('KeyA') || this.gameEngine.isKeyPressed('ArrowLeft')) {
             this.mesh.position.x -= moveSpeed;
             isMoving = true;
+            console.log('⬅️ Moving left, new X:', this.mesh.position.x);
         }
         if (this.gameEngine.isKeyPressed('KeyD') || this.gameEngine.isKeyPressed('ArrowRight')) {
             this.mesh.position.x += moveSpeed;
             isMoving = true;
+            console.log('➡️ Moving right, new X:', this.mesh.position.x);
         }
         
         // Update animation state

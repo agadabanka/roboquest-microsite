@@ -5,9 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RoboQuest - Play Now</title>
     
-    <!-- Three.js only for now (proven working) -->
+    <!-- Three.js (proven working) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- Physics will be added later - focus on getting 3D scene working first -->
+    <!-- Cannon.js (UMD version for script tag compatibility) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.17.1/cannon.min.js"></script>
+    
+    <script>
+        // Test physics library loading systematically
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                console.log('🔍 STEP 1: Testing library loading...');
+                console.log('Three.js loaded:', typeof THREE !== 'undefined');
+                console.log('Cannon-es loaded:', typeof CANNON !== 'undefined');
+                
+                if (typeof CANNON !== 'undefined') {
+                    console.log('✅ Cannon-es physics engine available');
+                    console.log('🌍 STEP 2: Testing physics world creation...');
+                    try {
+                        const testWorld = new CANNON.World();
+                        testWorld.gravity.set(0, -9.82, 0);
+                        console.log('✅ Cannon-es world creation successful');
+                        console.log('📦 Available shapes:', Object.keys(CANNON.Shape || {}));
+                    } catch (e) {
+                        console.error('❌ Cannon-es world creation failed:', e);
+                    }
+                } else {
+                    console.error('❌ Cannon-es not loaded from CDN');
+                }
+            }, 500);
+        });
+    </script>
     
     <style>
         * {
@@ -144,7 +171,8 @@
                 WASD / Arrow Keys - Move<br>
                 Space - Jump<br>
                 Mouse - Look Around<br>
-                Click - Hover/Jetpack
+                Click - Hover/Jetpack<br><br>
+                <button onclick="testMovement()" style="background:#4A90E2; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Test Movement</button>
             </div>
         </div>
     </div>

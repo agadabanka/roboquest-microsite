@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movement Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <canvas id="testCanvas" style="width: 800px; height: 600px; border: 1px solid #ccc;"></canvas>
+    <div id="debug" style="position: absolute; top: 10px; left: 10px; color: white; background: rgba(0,0,0,0.5); padding: 10px;">
+        <div>Movement Test</div>
+        <div id="keyStatus">Keys: </div>
+        <div id="position">Position: </div>
+    </div>
+    
+    <script>
+        // Simple movement test
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, 800/600, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({canvas: document.getElementById('testCanvas')});
+        renderer.setSize(800, 600);
+        
+        // Add lighting
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(10, 10, 10);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x404040, 0.5));
+        
+        // Create simple cube as player
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const material = new THREE.MeshLambertMaterial({color: 0x00ff00});
+        const player = new THREE.Mesh(geometry, material);
+        player.position.set(0, 0, 0);
+        scene.add(player);
+        
+        // Position camera
+        camera.position.set(0, 5, 10);
+        camera.lookAt(0, 0, 0);
+        
+        // Input handling
+        const keys = {};
+        
+        document.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+            console.log('Key down:', e.code);
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+            console.log('Key up:', e.code);
+        });
+        
+        // Game loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const speed = 0.1;
+            let moved = false;
+            
+            if (keys['KeyW']) {
+                player.position.z -= speed;
+                moved = true;
+            }
+            if (keys['KeyS']) {
+                player.position.z += speed;
+                moved = true;
+            }
+            if (keys['KeyA']) {
+                player.position.x -= speed;
+                moved = true;
+            }
+            if (keys['KeyD']) {
+                player.position.x += speed;
+                moved = true;
+            }
+            
+            if (moved) {
+                console.log('Player moved to:', player.position);
+            }
+            
+            // Update debug info
+            document.getElementById('keyStatus').textContent = 
+                'Keys: W=' + !!keys['KeyW'] + ' A=' + !!keys['KeyA'] + ' S=' + !!keys['KeyS'] + ' D=' + !!keys['KeyD'];
+            document.getElementById('position').textContent = 
+                `Position: x=${player.position.x.toFixed(2)}, y=${player.position.y.toFixed(2)}, z=${player.position.z.toFixed(2)}`;
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        console.log('✅ Simple movement test ready - use WASD keys');
+    </script>
+</body>
+</html>

@@ -290,6 +290,36 @@ window.RoboQuestGame = {
     getPerformanceStats: () => gameLogic ? gameLogic.getPerformanceStats() : null
 };
 
+// Test movement function for debugging
+window.testMovement = function() {
+    console.log('🧪 Manual movement test triggered');
+    
+    if (gameLogic && gameLogic.player) {
+        const player = gameLogic.player;
+        const oldPos = {x: player.mesh.position.x, y: player.mesh.position.y, z: player.mesh.position.z};
+        
+        // Move player directly
+        player.mesh.position.x += 2;
+        player.mesh.position.z += 2;
+        
+        const newPos = {x: player.mesh.position.x, y: player.mesh.position.y, z: player.mesh.position.z};
+        
+        console.log('📍 Old position:', oldPos);
+        console.log('📍 New position:', newPos);
+        console.log('✅ Manual movement test complete');
+        
+        // Test key state
+        console.log('🎮 Current key states:', {
+            W: window.gameEngine.isKeyPressed('KeyW'),
+            A: window.gameEngine.isKeyPressed('KeyA'),
+            S: window.gameEngine.isKeyPressed('KeyS'), 
+            D: window.gameEngine.isKeyPressed('KeyD')
+        });
+    } else {
+        console.error('❌ Game not initialized for movement test');
+    }
+};
+
 // Development helpers
 window.RoboQuestDebug = {
     enableDebug: () => gameLogic?.enableDebugMode(),

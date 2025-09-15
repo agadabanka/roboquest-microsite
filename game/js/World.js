@@ -384,20 +384,47 @@ class World {
         leavesTexture.wrapT = THREE.RepeatWrapping;
         leavesTexture.repeat.set(2, 2);
         
-        const leavesGeometry = new THREE.SphereGeometry(2.5, 12, 8);
-        const leavesMaterial = new THREE.MeshLambertMaterial({ 
-            map: leavesTexture,
-            normalMap: leavesNormalMap, // Add normal map for leaf detail
-            alphaMap: leavesAlphaMap, // Add alpha map for realistic edges
-            transparent: true, // Enable transparency for alpha map
-            color: 0x32CD32,
-            emissive: 0x0a1f0a
+        // Multi-sphere foliage for organic tree shape (instead of single blob)
+        console.log('🌿 Creating multi-sphere tree canopy with AI texture variations...');
+        
+        // Create multiple spheres with varied sizes and positions
+        const foliageSpheres = [
+            { pos: [0, 5, 0], size: 2.2, variation: 1 },      // Main canopy
+            { pos: [-1, 4.5, 0.5], size: 1.8, variation: 2 }, // Left cluster
+            { pos: [1, 4.8, -0.3], size: 1.9, variation: 3 }, // Right cluster
+            { pos: [0.2, 5.8, 0.2], size: 1.5, variation: 4 }, // Top cluster
+            { pos: [-0.5, 4.2, -0.8], size: 1.6, variation: 1 } // Back cluster
+        ];
+        
+        foliageSpheres.forEach((sphere, index) => {
+            const sphereGeometry = new THREE.SphereGeometry(sphere.size, 12, 8);
+            
+            // Use different AI-generated leaf variations for visual diversity
+            const variationTexture = textureLoader.load(
+                `./textures/leaves_variation_${sphere.variation}_20250915_124${330 + (sphere.variation - 1) * 7}.png`,
+                () => console.log(`✅ AI leaf variation ${sphere.variation} loaded`),
+                undefined,
+                () => {
+                    console.warn(`⚠️ Leaf variation ${sphere.variation} failed, using main texture`);
+                }
+            );
+            
+            const sphereMaterial = new THREE.MeshLambertMaterial({ 
+                map: variationTexture,
+                color: 0x32CD32,
+                emissive: 0x0a1f0a,
+                transparent: true
+            });
+            
+            const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            sphereMesh.position.set(...sphere.pos);
+            sphereMesh.castShadow = true;
+            sphereMesh.receiveShadow = true;
+            
+            treeGroup.add(sphereMesh);
         });
-        const leavesMesh = new THREE.Mesh(leavesGeometry, leavesMaterial);
-        leavesMesh.position.y = 5;
-        leavesMesh.castShadow = true;
-        leavesMesh.receiveShadow = true;
-        treeGroup.add(leavesMesh);
+        
+        console.log('✅ Multi-sphere tree canopy created with AI texture variations');
         
         treeGroup.position.set(x, y, z);
         this.scene.add(treeGroup);

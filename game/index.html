@@ -166,13 +166,14 @@
                 <div id="lives">Lives: 3</div>
             </div>
             
-            <div id="controls">
+            <div id="controls" style="pointer-events: all; z-index: 200;">
                 <strong>Controls:</strong><br>
                 WASD / Arrow Keys - Move<br>
                 Space - Jump<br>
                 Mouse - Look Around<br>
                 Click - Hover/Jetpack<br><br>
-                <button onclick="testMovement()" style="background:#4A90E2; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Test Movement</button>
+                <button onclick="testMovement()" style="background:#4A90E2; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; pointer-events:all; position:relative; z-index:300;">Test Movement</button><br><br>
+                <button onclick="debugMovement()" style="background:#F5A623; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; pointer-events:all; position:relative; z-index:300;">Debug Forces</button>
             </div>
         </div>
     </div>

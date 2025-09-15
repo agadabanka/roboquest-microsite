@@ -298,25 +298,57 @@ window.testMovement = function() {
         const player = gameLogic.player;
         const oldPos = {x: player.mesh.position.x, y: player.mesh.position.y, z: player.mesh.position.z};
         
-        // Move player directly
-        player.mesh.position.x += 2;
-        player.mesh.position.z += 2;
+        // Move player directly via physics
+        if (player.physicsBody) {
+            player.physicsBody.position.x += 4;
+            player.physicsBody.position.z += 4;
+            console.log('🚀 Applied direct physics position change');
+        } else {
+            // Fallback to mesh movement
+            player.mesh.position.x += 4;
+            player.mesh.position.z += 4;
+            console.log('🎨 Applied direct mesh position change');
+        }
         
         const newPos = {x: player.mesh.position.x, y: player.mesh.position.y, z: player.mesh.position.z};
         
         console.log('📍 Old position:', oldPos);
         console.log('📍 New position:', newPos);
         console.log('✅ Manual movement test complete');
-        
-        // Test key state
-        console.log('🎮 Current key states:', {
-            W: window.gameEngine.isKeyPressed('KeyW'),
-            A: window.gameEngine.isKeyPressed('KeyA'),
-            S: window.gameEngine.isKeyPressed('KeyS'), 
-            D: window.gameEngine.isKeyPressed('KeyD')
-        });
     } else {
         console.error('❌ Game not initialized for movement test');
+    }
+};
+
+// Debug forces function
+window.debugMovement = function() {
+    console.log('🔧 Movement debugging started...');
+    
+    if (gameLogic && gameLogic.player) {
+        const player = gameLogic.player;
+        
+        console.log('🤖 Player Debug Info:', {
+            physicsBodyExists: !!player.physicsBody,
+            position: player.mesh.position,
+            physicsPosition: player.physicsBody ? player.physicsBody.position : 'No physics body',
+            velocity: player.physicsBody ? player.physicsBody.velocity : 'No physics body',
+            isGrounded: player.isGrounded,
+            moveSpeed: player.moveSpeed
+        });
+        
+        // Test direct force application
+        if (player.physicsBody) {
+            console.log('🚀 Testing force application...');
+            player.physicsBody.force.x += 100; // Strong force
+            console.log('Applied strong X force of 100');
+            
+            setTimeout(() => {
+                console.log('📍 Position after force application:', player.mesh.position);
+                console.log('🏎️ Velocity after force:', player.physicsBody.velocity);
+            }, 1000);
+        }
+    } else {
+        console.error('❌ Game not ready for debugging');
     }
 };
 

@@ -88,6 +88,9 @@ class World {
         
         this.scene.add(groundMesh);
         
+        console.log('🌍 Ground plane created and added to scene');
+        console.log('📍 Ground position:', groundMesh.position);
+        
         // Physics ground (disabled for initial testing)
         // const groundShape = new CANNON.Box(new CANNON.Vec3(100, 0.1, 100));
         // const groundBody = new CANNON.Body({ mass: 0 });
@@ -378,8 +381,10 @@ class World {
                 mesh.position.y = userData.originalY + 
                     Math.sin(Date.now() * 0.001 * userData.bobSpeed) * userData.bobAmount;
                 
-                // Sync physics body position
-                collectible.body.position.copy(mesh.position);
+                // Sync physics body position (only if physics body exists)
+                if (collectible.body) {
+                    collectible.body.position.copy(mesh.position);
+                }
             }
         });
         
@@ -397,7 +402,9 @@ class World {
                     .add(offset);
                 
                 platform.mesh.position.copy(newPosition);
-                platform.body.position.copy(newPosition);
+                if (platform.body) {
+                    platform.body.position.copy(newPosition);
+                }
             }
         });
         

@@ -74,8 +74,11 @@ class GameEngine {
         );
         
         // Initial camera position (behind and above the player)
-        this.camera.position.set(0, 8, 10);
-        this.camera.lookAt(0, 2, 0);
+        this.camera.position.set(0, 10, 15);
+        this.camera.lookAt(0, 0, 0);
+        
+        console.log('📷 Camera positioned at:', this.camera.position);
+        console.log('📷 Camera looking at: 0, 0, 0');
     }
     
     createPhysicsWorld() {

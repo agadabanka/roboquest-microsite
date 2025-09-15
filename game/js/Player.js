@@ -124,6 +124,9 @@ class Player {
         // Add to scene
         this.scene.add(this.mesh);
         
+        console.log('🤖 Robot character created and added to scene');
+        console.log('📍 Robot position:', this.mesh.position);
+        
         // Create hover effect particles (will be activated during hover)
         this.createHoverEffects();
     }
@@ -196,42 +199,41 @@ class Player {
     
     update(deltaTime) {
         this.handleInput(deltaTime);
-        this.updatePhysics(deltaTime);
+        this.updatePhysics(deltaTime); // Re-enabled with physics-free version
         this.updateAnimations(deltaTime);
         this.updateCamera(deltaTime);
         this.updateHUD();
         
-        // Sync visual mesh with physics body
-        this.mesh.position.copy(this.physicsBody.position);
-        this.mesh.quaternion.copy(this.physicsBody.quaternion);
+        // Visual updates only (no physics sync needed)
+        // this.mesh.position.copy(this.physicsBody.position);
+        // this.mesh.quaternion.copy(this.physicsBody.quaternion);
     }
     
     handleInput(deltaTime) {
-        const force = new CANNON.Vec3();
+        // Physics-free movement for initial testing
         let isMoving = false;
+        const moveSpeed = 0.1;
         
-        // Horizontal movement (WASD or Arrow Keys)
+        // Direct mesh movement (physics-free)
         if (this.gameEngine.isKeyPressed('KeyW') || this.gameEngine.isKeyPressed('ArrowUp')) {
-            force.z -= this.moveSpeed;
+            this.mesh.position.z -= moveSpeed;
             isMoving = true;
         }
         if (this.gameEngine.isKeyPressed('KeyS') || this.gameEngine.isKeyPressed('ArrowDown')) {
-            force.z += this.moveSpeed;
+            this.mesh.position.z += moveSpeed;
             isMoving = true;
         }
         if (this.gameEngine.isKeyPressed('KeyA') || this.gameEngine.isKeyPressed('ArrowLeft')) {
-            force.x -= this.moveSpeed;
+            this.mesh.position.x -= moveSpeed;
             isMoving = true;
         }
         if (this.gameEngine.isKeyPressed('KeyD') || this.gameEngine.isKeyPressed('ArrowRight')) {
-            force.x += this.moveSpeed;
+            this.mesh.position.x += moveSpeed;
             isMoving = true;
         }
         
-        // Apply movement force
+        // Update animation state
         if (isMoving) {
-            this.physicsBody.force.x += force.x;
-            this.physicsBody.force.z += force.z;
             this.animationState = 'walking';
         } else {
             this.animationState = 'idle';
@@ -255,12 +257,10 @@ class Player {
             this.stopHover();
         }
         
-        // Limit horizontal velocity for responsive controls
-        const maxHorizontalSpeed = 10;
-        this.physicsBody.velocity.x = Math.max(-maxHorizontalSpeed, 
-            Math.min(maxHorizontalSpeed, this.physicsBody.velocity.x));
-        this.physicsBody.velocity.z = Math.max(-maxHorizontalSpeed, 
-            Math.min(maxHorizontalSpeed, this.physicsBody.velocity.z));
+        // Simple boundary checking (physics-free)
+        const maxDistance = 50;
+        this.mesh.position.x = Math.max(-maxDistance, Math.min(maxDistance, this.mesh.position.x));
+        this.mesh.position.z = Math.max(-maxDistance, Math.min(maxDistance, this.mesh.position.z));
     }
     
     jump() {
@@ -312,21 +312,17 @@ class Player {
     }
     
     updatePhysics(deltaTime) {
-        // Reset grounded state (will be set by collision detection)
-        this.isGrounded = false;
+        // Physics-free version - just basic state management
+        this.isGrounded = true; // Always grounded for now
         
-        // Hover time recovery when grounded
-        if (this.isGrounded && this.currentHoverTime > 0) {
+        // Hover time recovery
+        if (this.currentHoverTime > 0) {
             this.currentHoverTime = Math.max(0, this.currentHoverTime - deltaTime * 2);
         }
         
-        // Apply air resistance for better control
-        this.physicsBody.velocity.x *= 0.98;
-        this.physicsBody.velocity.z *= 0.98;
-        
-        // Terminal velocity
-        if (this.physicsBody.velocity.y < -25) {
-            this.physicsBody.velocity.y = -25;
+        // Keep player at reasonable height
+        if (this.mesh.position.y < 2) {
+            this.mesh.position.y = 2;
         }
     }
     

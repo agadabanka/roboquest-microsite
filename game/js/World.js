@@ -321,15 +321,23 @@ class World {
         const treeGroup = new THREE.Group();
         const textureLoader = new THREE.TextureLoader();
         
-        // Textured trunk (bark texture from reliable source)
+        // Professional bark texture (local PBR texture set)
         const trunkTexture = textureLoader.load(
-            'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_diff_1k.jpg',
-            () => console.log('✅ Bark texture loaded from Poly Haven'),
+            './textures/bark.png',
+            () => console.log('✅ Professional bark texture loaded (local)'),
             undefined,
             () => {
-                console.warn('⚠️ Bark texture failed, using procedural bark');
+                console.warn('⚠️ Local bark texture failed, using procedural');
                 trunkMesh.material = this.createProceduralBarkTexture();
             }
+        );
+        
+        // Load normal map for bark detail
+        const trunkNormalMap = textureLoader.load(
+            './textures/bark-normal.png',
+            () => console.log('✅ Bark normal map loaded'),
+            undefined,
+            () => console.warn('⚠️ Bark normal map failed')
         );
         trunkTexture.wrapS = THREE.RepeatWrapping;
         trunkTexture.wrapT = THREE.RepeatWrapping;
@@ -338,6 +346,7 @@ class World {
         const trunkGeometry = new THREE.CylinderGeometry(0.5, 0.8, 4, 8);
         const trunkMaterial = new THREE.MeshLambertMaterial({ 
             map: trunkTexture,
+            normalMap: trunkNormalMap, // Add normal map for detail
             color: 0x8B4513 
         });
         const trunkMesh = new THREE.Mesh(trunkGeometry, trunkMaterial);
@@ -345,15 +354,31 @@ class World {
         trunkMesh.castShadow = true;
         treeGroup.add(trunkMesh);
         
-        // Leaves with organic texture (inspired by Astro Bot coral trees)
+        // Professional leaf texture (local PBR texture set)
         const leavesTexture = textureLoader.load(
-            'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/moss_02/moss_02_diff_1k.jpg',
-            () => console.log('✅ Leaves texture loaded from Poly Haven'),
+            './textures/leaf.png',
+            () => console.log('✅ Professional leaf texture loaded (local)'),
             undefined,
             () => {
-                console.warn('⚠️ Leaves texture failed, using procedural foliage');
+                console.warn('⚠️ Local leaf texture failed, using procedural');
                 leavesMesh.material = this.createProceduralFoliageTexture();
             }
+        );
+        
+        // Load leaf normal map for detail
+        const leavesNormalMap = textureLoader.load(
+            './textures/leaf-normal.png',
+            () => console.log('✅ Leaf normal map loaded'),
+            undefined,
+            () => console.warn('⚠️ Leaf normal map failed')
+        );
+        
+        // Load leaf alpha map for realistic edges
+        const leavesAlphaMap = textureLoader.load(
+            './textures/leaf-alpha.png',
+            () => console.log('✅ Leaf alpha map loaded'),
+            undefined,
+            () => console.warn('⚠️ Leaf alpha map failed')
         );
         leavesTexture.wrapS = THREE.RepeatWrapping;
         leavesTexture.wrapT = THREE.RepeatWrapping;
@@ -362,6 +387,9 @@ class World {
         const leavesGeometry = new THREE.SphereGeometry(2.5, 12, 8);
         const leavesMaterial = new THREE.MeshLambertMaterial({ 
             map: leavesTexture,
+            normalMap: leavesNormalMap, // Add normal map for leaf detail
+            alphaMap: leavesAlphaMap, // Add alpha map for realistic edges
+            transparent: true, // Enable transparency for alpha map
             color: 0x32CD32,
             emissive: 0x0a1f0a
         });

@@ -22,7 +22,7 @@ class Player {
         this.lives = 3;
         
         // Movement parameters (tuned for responsive feel)
-        this.moveSpeed = 8;
+        this.moveSpeed = 50; // Increased for stronger horizontal movement
         this.jumpForce = 15;
         this.hoverForce = 8;
         this.maxHoverTime = 1.0; // 1 second hover like Astro Bot

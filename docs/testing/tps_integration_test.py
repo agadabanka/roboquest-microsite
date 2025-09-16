@@ -32,7 +32,9 @@ def run():
     driver = webdriver.Chrome(options=opts)
     driver.set_window_size(1280, 720)
     try:
-        driver.get('http://localhost:8000/game/index.html')
+        import sys
+        qp = ('?' + sys.argv[1]) if len(sys.argv) > 1 else ''
+        driver.get('http://localhost:8000/game/index.html' + qp)
         time.sleep(3)
         canvas = driver.find_element(By.ID, 'gameCanvas')
         # Do not request pointer lock in this test; OrbitControls handles rotation

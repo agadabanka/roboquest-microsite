@@ -33,9 +33,18 @@ class GameLogic {
         // Create player
         this.player = new Player(this.gameEngine);
         
-        // Create 3rd person camera controller
-        this.cameraController = new CameraController(this.gameEngine.camera, this.player);
-        console.log('📷 3rd person camera controller created');
+        // Create camera controller (A/B by query: ?controller=egloff)
+        const params = new URLSearchParams(window.location.search);
+        const controller = params.get('controller');
+        if (controller === 'egloff' && window.EgloffCameraRig) {
+            this.cameraController = new EgloffCameraRig(this.gameEngine.camera, this.player, {
+                height: 1.6, distance: 6.0
+            });
+            console.log('📷 Egloff camera rig created');
+        } else {
+            this.cameraController = new CameraController(this.gameEngine.camera, this.player);
+            console.log('📷 3rd person camera controller created');
+        }
         
         // Initialize audio (basic web audio for effects)
         this.initAudio();

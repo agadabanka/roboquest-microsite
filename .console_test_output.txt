@@ -1,0 +1,24 @@
+⚡ Quick RoboQuest Game Test
+==============================
+🔧 Setting up test environment...
+✅ Chrome WebDriver initialized
+🌐 Loading game...
+
+🧪 Testing game loading...
+✅ Game loading: PASSED
+✅ Game loaded successfully!
+
+🧪 Testing player movement...
+📍 Initial position: x=0.00, y=0.00, z=0.00
+✅ Movement: WORKING
+📏 Distance moved: 7.70 units
+
+🧪 Testing jump mechanics...
+✅ Jumping: WORKING
+📈 Height gained: 1.63 units
+🎮 Running game for 5 seconds...
+🎮 Console: http://localhost:8000/game/js/main.js 235:24 "⚠️ Low FPS detected:" 29
+📝 Captured 1 console logs
+🧹 Browser closed
+
+🎯 Quick test PASSED! Game is working.

@@ -391,6 +391,16 @@ class Player {
         }
         this.updateDirectionIndicator(indicatorDir);
         
+        // Debug telemetry for automated tests
+        try {
+            window.__playerDebug = {
+                yaw: this.mesh.rotation.y,
+                pos: { x: this.mesh.position.x, y: this.mesh.position.y, z: this.mesh.position.z },
+                isMoving: !!isMoving,
+                desiredDir: { x: indicatorDir.x, y: indicatorDir.y, z: indicatorDir.z }
+            };
+        } catch (e) { /* ignore */ }
+        
         // Jumping (Space key)
         if (this.gameEngine.isKeyPressed('Space')) {
             if (this.isGrounded) {

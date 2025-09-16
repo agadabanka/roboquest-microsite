@@ -1,0 +1,52 @@
+🎮 Tuned Movement Test - Industry Standard Values
+==================================================
+🎯 Testing 20 units/second movement + mouse camera
+🌐 Loading game...
+
+🎯 Test 1: Initial State
+   📸 Before/After screenshots saved
+
+🎯 Test 2: Move Right (D) - 2 seconds
+   ⏱️ Holding D for 2 seconds...
+   📸 Before/After screenshots saved
+   📍 Position: x=0.9, y=2.3, z=0
+
+🎯 Test 3: Move Forward (W) - 2 seconds
+   ⏱️ Holding W for 2 seconds...
+   📸 Before/After screenshots saved
+   📍 Position: x=1, y=2.3, z=-0.9
+
+🎯 Test 4: Move Left (A) - 2 seconds
+   ⏱️ Holding A for 2 seconds...
+   📸 Before/After screenshots saved
+   📍 Position: x=0, y=2.3, z=-1
+
+🎯 Test 5: Move Back (S) - 2 seconds
+   ⏱️ Holding S for 2 seconds...
+   📸 Before/After screenshots saved
+   📍 Position: x=0.1, y=2.3, z=0
+
+🎯 Test 6: Jump Test
+   📸 Before/After screenshots saved
+   📍 Position: x=0.1, y=2.3, z=0
+
+🎯 Test 7: Mouse Camera Test
+   🖱️ Testing mouse camera orbit...
+   📸 Before/After screenshots saved
+   📍 Position: x=0.1, y=2.3, z=0
+
+📊 TUNED MOVEMENT TEST COMPLETE!
+📸 Screenshots saved: tuned_test_1_before_initial.png through tuned_test_7_after_mouse.png
+🎯 Visual Analysis:
+   - Check if movement is more reasonable (less aggressive)
+   - Verify character moves 1-2 grid squares per 2-second input
+   - Confirm mouse camera orbit working
+   - Ensure jump height remains good
+
+🖱️ Mouse control logs: 3
+🖱️ http://localhost:8000/game/js/main.js 392:8 "\n🤖 Welcome to RoboQuest!\n==========================================\n🎮 3D Platformer built with Three.js\n🚀 Astro Bot-inspired mechanics\n📱 Web-first, mobile-ready\n==========================================\nControls:\n  WASD / Arrow Keys - Move\n  Space - Jump / Hover\n  Mouse - Camera (right-click drag)\n  R - Restart\n  P - Pause\n  F - Debug mode\n  ESC - Return to website\n==========================================\nHave fun exploring! 🎯\n"
+🖱️ http://localhost:8000/game/js/CameraController.js 88:16 "✅ Camera mouse controls initialized"
+🖱️ http://localhost:8000/game/js/GameLogic.js 43:16 "🤖 Use WASD/Arrow keys to move, Space to jump, Mouse to hover"
+
+⏱️ Extended time for manual WASD + mouse testing...
+🧹 Browser closed

@@ -40,7 +40,26 @@ class CameraController {
         this.pivot = new THREE.Object3D();
         
         this.setupEventListeners();
-        
+
+        // Optional: use OrbitControls when available for robust orbit behavior
+        const canvas = document.getElementById('gameCanvas');
+        if (typeof THREE !== 'undefined' && THREE.OrbitControls) {
+            this.orbit = new THREE.OrbitControls(this.camera, canvas || document.body);
+            this.orbit.enablePan = false;
+            this.orbit.enableDamping = true;
+            this.orbit.dampingFactor = 0.1;
+            this.orbit.rotateSpeed = 0.4; // tune as needed
+            this.orbit.minDistance = this.distance;
+            this.orbit.maxDistance = this.distance;
+            // Map pitch clamp to OrbitControls polar angles
+            this.orbit.minPolarAngle = Math.PI / 2 - this.maxVerticalAngle;
+            this.orbit.maxPolarAngle = Math.PI / 2 - this.minVerticalAngle;
+            this.useOrbit = true;
+            console.log('🎛️ OrbitControls active');
+        } else {
+            this.useOrbit = false;
+        }
+
         console.log('📷 3rd Person Camera Controller initialized');
     }
     
@@ -84,6 +103,7 @@ class CameraController {
         
         // Mouse move for camera rotation
         document.addEventListener('mousemove', (event) => {
+            if (this.useOrbit) return; // OrbitControls handles rotation
             // Pointer lock mode: rotate continuously by movement deltas
             if (this.isPointerLocked) {
                 const deltaX = event.movementX || 0;
@@ -96,15 +116,7 @@ class CameraController {
                 if (this.targetHorizontalAngle > Math.PI) this.targetHorizontalAngle -= Math.PI * 2;
                 if (this.targetHorizontalAngle < -Math.PI) this.targetHorizontalAngle += Math.PI * 2;
                 
-                // Optionally rotate character yaw with camera
-                if (this.lockCharacterYawToCamera && this.target && this.target.mesh) {
-                    const lerpAngle = (a, b, t) => {
-                        let delta = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI;
-                        return a + delta * t;
-                    };
-                    const targetYaw = this.targetHorizontalAngle;
-                    this.target.mesh.rotation.y = lerpAngle(this.target.mesh.rotation.y, targetYaw, 0.25);
-                }
+                // Character yaw rotation handled in Player to avoid double-writes
                 return;
             }
             
@@ -148,6 +160,46 @@ class CameraController {
     update(deltaTime) {
         if (!this.target) return;
         
+        // OrbitControls path
+        if (this.useOrbit && this.orbit) {
+            // Keep target at player position
+            const targetPosition = this.target.mesh ? this.target.mesh.position : this.target.position;
+            this.orbit.target.copy(targetPosition);
+            this.orbit.update();
+
+            // Have the character face away from the camera (TPS style)
+            if (this.lockCharacterYawToCamera && this.target && this.target.mesh) {
+                const forward = new THREE.Vector3();
+                this.camera.getWorldDirection(forward); // from camera into world (towards player)
+                forward.y = 0; forward.normalize();
+                const faceDir = forward.clone().multiplyScalar(-1); // away from camera
+                const desiredYaw = Math.atan2(faceDir.x, faceDir.z);
+                const lerpAngle = (a, b, t) => {
+                    let d = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI;
+                    return a + d * t;
+                };
+                this.target.mesh.rotation.y = lerpAngle(this.target.mesh.rotation.y, desiredYaw, 0.25);
+            }
+
+            // Debug telemetry
+            try {
+                const camPos = this.camera.position;
+                const playerYaw = this.target && this.target.mesh ? this.target.mesh.rotation.y : 0;
+                window.__camDebug = {
+                    yaw: null,
+                    pitch: null,
+                    targetYaw: null,
+                    targetPitch: null,
+                    playerYaw: playerYaw,
+                    followBehind: true,
+                    pointerLocked: false,
+                    pos: { x: camPos.x, y: camPos.y, z: camPos.z },
+                    target: { x: targetPosition.x, y: targetPosition.y, z: targetPosition.z }
+                };
+            } catch (e) {}
+            return;
+        }
+
         // Get target position
         const targetPosition = this.target.mesh ? this.target.mesh.position : this.target.position;
         
@@ -170,10 +222,14 @@ class CameraController {
         
         // Calculate desired camera position
         const cosPitch = Math.cos(this.verticalAngle);
-        // If follow-behind mode is on, lock camera yaw to character's yaw (stay behind the jetpack)
-        const yawForCamera = (this.followBehindTarget && this.target && this.target.mesh)
-            ? this.target.mesh.rotation.y
-            : this.horizontalAngle;
+        // If follow-behind mode is on, hard-lock camera yaw to character's yaw (stay behind the jetpack)
+        let yawForCamera = this.horizontalAngle;
+        if (this.followBehindTarget && this.target && this.target.mesh) {
+            const pyaw = this.target.mesh.rotation.y;
+            this.targetHorizontalAngle = pyaw; // keep targets aligned
+            this.horizontalAngle = pyaw;       // hard lock yaw for stability
+            yawForCamera = pyaw;
+        }
         const desiredX = targetPosition.x + Math.sin(yawForCamera) * this.distance * cosPitch;
         const desiredY = targetPosition.y + this.height + Math.sin(this.verticalAngle) * this.distance;
         const desiredZ = targetPosition.z + Math.cos(yawForCamera) * this.distance * cosPitch;
@@ -190,6 +246,23 @@ class CameraController {
             targetPosition.z
         );
         this.camera.lookAt(lookTarget);
+
+        // Debug telemetry for automated tests
+        try {
+            const camPos = this.camera.position;
+            const playerYaw = this.target && this.target.mesh ? this.target.mesh.rotation.y : 0;
+            window.__camDebug = {
+                yaw: this.horizontalAngle,
+                pitch: this.verticalAngle,
+                targetYaw: this.targetHorizontalAngle,
+                targetPitch: this.targetVerticalAngle,
+                playerYaw: playerYaw,
+                followBehind: !!this.followBehindTarget,
+                pointerLocked: !!this.isPointerLocked,
+                pos: { x: camPos.x, y: camPos.y, z: camPos.z },
+                target: { x: targetPosition.x, y: targetPosition.y, z: targetPosition.z }
+            };
+        } catch (e) { /* ignore */ }
     }
     
     // Get camera forward direction for movement

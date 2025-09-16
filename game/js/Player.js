@@ -22,7 +22,7 @@ class Player {
         this.lives = 3;
         
         // Movement parameters (TPS-style, 10x faster)
-        this.moveSpeed = 500; // 10x boost for much faster traversal
+        this.moveSpeed = 100; // 10x boost for much faster traversal
         this.jumpForce = 16;  // Stronger jump to keep feel after speed boost
         this.hoverForce = 6;  // Softer hover assist
         this.accelLerp = 0.6; // Faster acceleration to reach target speed quickly

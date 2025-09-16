@@ -9,10 +9,11 @@ class CameraController {
         this.target = target; // Player object to follow
         
         // Camera settings
-        this.distance = 10; // Distance behind player
-        this.height = 6; // Height above player
-        this.rotationSpeed = options.rotationSpeed || 0.002; // Mouse sensitivity
-        this.smoothness = 0.05; // Camera smoothing factor
+        this.distance = options.distance || 10; // Distance behind player
+        this.height = options.height || 6; // Height above player
+        this.mouseSensitivity = options.mouseSensitivity || 0.0012; // Lower = slower
+        this.smoothness = options.smoothness || 0.08; // Camera position smoothing
+        this.rotationSmoothness = options.rotationSmoothness || 0.15; // Angle smoothing
         this.lockCharacterYawToCamera = options.lockCharacterYawToCamera !== false; // default true
         
         // Mouse control state
@@ -24,10 +25,13 @@ class CameraController {
         this.isPointerLocked = false;
         
         // Camera rotation
-        this.horizontalAngle = 0; // Yaw around player
-        this.verticalAngle = 0.3; // Pitch angle
-        this.minVerticalAngle = -Math.PI / 3; // Look down limit
-        this.maxVerticalAngle = Math.PI / 3; // Look up limit
+        this.horizontalAngle = 0; // Current yaw
+        this.verticalAngle = 0.25; // Current pitch
+        this.targetHorizontalAngle = 0; // Target yaw for smoothing
+        this.targetVerticalAngle = 0.25; // Target pitch for smoothing
+        // Tighter TPS pitch limits (approx -35° to +25°)
+        this.minVerticalAngle = options.minPitch ?? -0.6;
+        this.maxVerticalAngle = options.maxPitch ?? 0.45;
         
         // Camera pivot point
         this.pivot = new THREE.Object3D();
@@ -81,9 +85,10 @@ class CameraController {
             if (this.isPointerLocked) {
                 const deltaX = event.movementX || 0;
                 const deltaY = event.movementY || 0;
-                this.horizontalAngle -= deltaX * this.rotationSpeed;
-                this.verticalAngle -= deltaY * this.rotationSpeed;
-                this.verticalAngle = Math.max(this.minVerticalAngle, Math.min(this.maxVerticalAngle, this.verticalAngle));
+                this.targetHorizontalAngle -= deltaX * this.mouseSensitivity;
+                this.targetVerticalAngle -= deltaY * this.mouseSensitivity;
+                // Clamp pitch
+                this.targetVerticalAngle = Math.max(this.minVerticalAngle, Math.min(this.maxVerticalAngle, this.targetVerticalAngle));
                 
                 // Optionally rotate character yaw with camera
                 if (this.lockCharacterYawToCamera && this.target && this.target.mesh) {
@@ -91,7 +96,7 @@ class CameraController {
                         let delta = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI;
                         return a + delta * t;
                     };
-                    const targetYaw = this.horizontalAngle;
+                    const targetYaw = this.targetHorizontalAngle;
                     this.target.mesh.rotation.y = lerpAngle(this.target.mesh.rotation.y, targetYaw, 0.25);
                 }
                 return;
@@ -103,19 +108,19 @@ class CameraController {
                 const deltaY = event.clientY - this.previousMouseY;
                 
                 // Update camera rotation
-                this.horizontalAngle -= deltaX * this.rotationSpeed;
-                this.verticalAngle -= deltaY * this.rotationSpeed;
+                this.targetHorizontalAngle -= deltaX * this.mouseSensitivity;
+                this.targetVerticalAngle -= deltaY * this.mouseSensitivity;
                 
                 // Clamp vertical angle
-                this.verticalAngle = Math.max(this.minVerticalAngle, 
-                    Math.min(this.maxVerticalAngle, this.verticalAngle));
+                this.targetVerticalAngle = Math.max(this.minVerticalAngle, 
+                    Math.min(this.maxVerticalAngle, this.targetVerticalAngle));
                 
                 this.previousMouseX = event.clientX;
                 this.previousMouseY = event.clientY;
                 
                 console.log('🖱️ Camera rotation:', {
-                    horizontal: this.horizontalAngle,
-                    vertical: this.verticalAngle
+                    horizontal: this.targetHorizontalAngle,
+                    vertical: this.targetVerticalAngle
                 });
             }
         });
@@ -137,13 +142,21 @@ class CameraController {
         // Get target position
         const targetPosition = this.target.mesh ? this.target.mesh.position : this.target.position;
         
-        // Calculate desired camera position based on rotation
-        const desiredX = targetPosition.x + 
-            Math.sin(this.horizontalAngle) * this.distance * Math.cos(this.verticalAngle);
-        const desiredY = targetPosition.y + this.height + 
-            Math.sin(this.verticalAngle) * this.distance;
-        const desiredZ = targetPosition.z + 
-            Math.cos(this.horizontalAngle) * this.distance * Math.cos(this.verticalAngle);
+        // Smooth angles towards targets
+        const wrap = (a) => {
+            // keep within -PI..PI for numerical stability
+            if (a > Math.PI) a -= Math.PI * 2;
+            if (a < -Math.PI) a += Math.PI * 2;
+            return a;
+        };
+        this.horizontalAngle = wrap(this.horizontalAngle + (this.targetHorizontalAngle - this.horizontalAngle) * this.rotationSmoothness);
+        this.verticalAngle = this.verticalAngle + (this.targetVerticalAngle - this.verticalAngle) * this.rotationSmoothness;
+        
+        // Calculate desired camera position based on smoothed angles
+        const cosPitch = Math.cos(this.verticalAngle);
+        const desiredX = targetPosition.x + Math.sin(this.horizontalAngle) * this.distance * cosPitch;
+        const desiredY = targetPosition.y + this.height + Math.sin(this.verticalAngle) * this.distance;
+        const desiredZ = targetPosition.z + Math.cos(this.horizontalAngle) * this.distance * cosPitch;
         
         const desiredPosition = new THREE.Vector3(desiredX, desiredY, desiredZ);
         

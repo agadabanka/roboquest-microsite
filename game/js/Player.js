@@ -125,12 +125,15 @@ class Player {
         
         // Add to scene
         this.scene.add(this.mesh);
-        
+
         console.log('🤖 Robot character created and added to scene');
         console.log('📍 Robot position:', this.mesh.position);
-        
+
         // Create hover effect particles (will be activated during hover)
         this.createHoverEffects();
+
+        // Create direction indicator (TPS aim/heading helper)
+        this.createDirectionIndicator();
     }
     
     createPhysicsBody() {
@@ -203,6 +206,33 @@ class Player {
             jumping: { stretch: 0.1 },
             hovering: { glow: true, jetpackPulse: true }
         };
+    }
+
+    createDirectionIndicator() {
+        const dir = new THREE.Vector3(0, 0, 1);
+        const origin = new THREE.Vector3(0, 1.2, 0);
+        const length = 3;
+        const color = 0x50E3C2; // cyan
+        this.directionHelper = new THREE.ArrowHelper(dir, origin, length, color, 0.6, 0.4);
+        // Attach to scene so we can position in world each frame
+        this.scene.add(this.directionHelper);
+    }
+
+    updateDirectionIndicator(worldDir) {
+        if (!this.directionHelper) return;
+        const dir = worldDir.clone();
+        dir.y = 0;
+        if (dir.lengthSq() < 1e-4) {
+            // Default to character forward if no input
+            const forward = new THREE.Vector3(0, 0, 1).applyEuler(this.mesh.rotation);
+            dir.copy(forward);
+        }
+        dir.normalize();
+        this.directionHelper.setDirection(dir);
+        this.directionHelper.position.copy(this.mesh.position);
+        this.directionHelper.position.y += 1.2;
+        this.directionHelper.setLength(3, 0.6, 0.4);
+        this.directionHelper.visible = true;
     }
     
     update(deltaTime) {
@@ -328,7 +358,7 @@ class Player {
             }
         }
 
-        // TPS-style facing: if mouse orbiting, face camera forward; otherwise face movement direction
+        // TPS-style facing: if mouse aiming/orbiting, face camera forward; otherwise face movement direction
         const cam = this.gameEngine.camera;
         let targetYaw = null;
         const camController = window.gameLogic && window.gameLogic.cameraController;
@@ -347,6 +377,21 @@ class Player {
             };
             this.mesh.rotation.y = lerpAngle(this.mesh.rotation.y, targetYaw, this.turnLerp);
         }
+
+        // Update direction indicator: prefer movement dir, else camera forward while aiming
+        const indicatorDir = (isMoving && moveDirThree.lengthSq() > 0)
+            ? moveDirThree
+            : (camController && (camController.isPointerLocked || camController.isMouseDown))
+                ? new THREE.Vector3().copy(new THREE.Vector3().setFromMatrixColumn(this.gameEngine.camera.matrixWorld, 0)).cross(new THREE.Vector3(0,1,0)).negate() // fallback if needed
+                : new THREE.Vector3(0, 0, 0);
+        // Better: get camera forward
+        if (camController && (camController.isPointerLocked || camController.isMouseDown) && (!isMoving || indicatorDir.lengthSq() === 0)) {
+            const camForward = new THREE.Vector3();
+            this.gameEngine.camera.getWorldDirection(camForward);
+            camForward.y = 0;
+            indicatorDir.copy(camForward);
+        }
+        this.updateDirectionIndicator(indicatorDir);
         
         // Jumping (Space key)
         if (this.gameEngine.isKeyPressed('Space')) {

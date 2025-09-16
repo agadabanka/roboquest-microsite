@@ -14,6 +14,8 @@ class CameraController {
         this.mouseSensitivity = options.mouseSensitivity || 0.0012; // Lower = slower
         this.smoothness = options.smoothness || 0.08; // Camera position smoothing
         this.rotationSmoothness = options.rotationSmoothness || 0.15; // Angle smoothing
+        this.maxYawSpeed = options.maxYawSpeed || 0.06;   // rad per frame cap
+        this.maxPitchSpeed = options.maxPitchSpeed || 0.04; // rad per frame cap
         this.lockCharacterYawToCamera = options.lockCharacterYawToCamera !== false; // default true
         
         // Mouse control state
@@ -89,6 +91,9 @@ class CameraController {
                 this.targetVerticalAngle -= deltaY * this.mouseSensitivity;
                 // Clamp pitch
                 this.targetVerticalAngle = Math.max(this.minVerticalAngle, Math.min(this.maxVerticalAngle, this.targetVerticalAngle));
+                // Normalize yaw target to [-PI, PI]
+                if (this.targetHorizontalAngle > Math.PI) this.targetHorizontalAngle -= Math.PI * 2;
+                if (this.targetHorizontalAngle < -Math.PI) this.targetHorizontalAngle += Math.PI * 2;
                 
                 // Optionally rotate character yaw with camera
                 if (this.lockCharacterYawToCamera && this.target && this.target.mesh) {
@@ -114,6 +119,9 @@ class CameraController {
                 // Clamp vertical angle
                 this.targetVerticalAngle = Math.max(this.minVerticalAngle, 
                     Math.min(this.maxVerticalAngle, this.targetVerticalAngle));
+                // Normalize yaw target to [-PI, PI]
+                if (this.targetHorizontalAngle > Math.PI) this.targetHorizontalAngle -= Math.PI * 2;
+                if (this.targetHorizontalAngle < -Math.PI) this.targetHorizontalAngle += Math.PI * 2;
                 
                 this.previousMouseX = event.clientX;
                 this.previousMouseY = event.clientY;
@@ -142,15 +150,22 @@ class CameraController {
         // Get target position
         const targetPosition = this.target.mesh ? this.target.mesh.position : this.target.position;
         
-        // Smooth angles towards targets
-        const wrap = (a) => {
-            // keep within -PI..PI for numerical stability
-            if (a > Math.PI) a -= Math.PI * 2;
-            if (a < -Math.PI) a += Math.PI * 2;
-            return a;
+        // Smooth angles towards targets with shortest-path and speed caps to prevent oscillation
+        const shortestDelta = (a, b) => {
+            let d = b - a;
+            d = (d + Math.PI) % (Math.PI * 2) - Math.PI; // wrap to [-PI, PI]
+            return d;
         };
-        this.horizontalAngle = wrap(this.horizontalAngle + (this.targetHorizontalAngle - this.horizontalAngle) * this.rotationSmoothness);
-        this.verticalAngle = this.verticalAngle + (this.targetVerticalAngle - this.verticalAngle) * this.rotationSmoothness;
+        // Yaw update
+        const yawDelta = shortestDelta(this.horizontalAngle, this.targetHorizontalAngle);
+        const clampedYawDelta = Math.max(-this.maxYawSpeed, Math.min(this.maxYawSpeed, yawDelta));
+        this.horizontalAngle += clampedYawDelta;
+        // Pitch update
+        let pitchDelta = this.targetVerticalAngle - this.verticalAngle;
+        const clampedPitchDelta = Math.max(-this.maxPitchSpeed, Math.min(this.maxPitchSpeed, pitchDelta));
+        this.verticalAngle += clampedPitchDelta;
+        // Enforce pitch clamp post-update
+        this.verticalAngle = Math.max(this.minVerticalAngle, Math.min(this.maxVerticalAngle, this.verticalAngle));
         
         // Calculate desired camera position based on smoothed angles
         const cosPitch = Math.cos(this.verticalAngle);

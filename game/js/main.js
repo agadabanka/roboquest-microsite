@@ -66,7 +66,9 @@ function initializeGame() {
         monitorPerformance();
         
     } catch (error) {
-        console.error('❌ Game initialization failed:', error);
+        // Guard against null error objects (seen in some browser logs)
+        const message = (error && error.message) ? error.message : error;
+        console.error('❌ Game initialization failed:', message);
         showErrorMessage('Failed to initialize game. Please refresh the page.');
     }
 }

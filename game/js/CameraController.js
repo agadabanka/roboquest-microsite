@@ -4,15 +4,16 @@ Professional follow camera with mouse controls
 */
 
 class CameraController {
-    constructor(camera, target) {
+    constructor(camera, target, options = {}) {
         this.camera = camera;
         this.target = target; // Player object to follow
         
         // Camera settings
         this.distance = 10; // Distance behind player
         this.height = 6; // Height above player
-        this.rotationSpeed = 0.002; // Mouse sensitivity
+        this.rotationSpeed = options.rotationSpeed || 0.002; // Mouse sensitivity
         this.smoothness = 0.05; // Camera smoothing factor
+        this.lockCharacterYawToCamera = options.lockCharacterYawToCamera !== false; // default true
         
         // Mouse control state
         this.isMouseDown = false;
@@ -20,6 +21,7 @@ class CameraController {
         this.mouseY = 0;
         this.previousMouseX = 0;
         this.previousMouseY = 0;
+        this.isPointerLocked = false;
         
         // Camera rotation
         this.horizontalAngle = 0; // Yaw around player
@@ -36,6 +38,25 @@ class CameraController {
     }
     
     setupEventListeners() {
+        const canvas = document.getElementById('gameCanvas');
+        if (canvas) {
+            canvas.addEventListener('click', () => {
+                if (!this.isPointerLocked && canvas.requestPointerLock) {
+                    canvas.requestPointerLock();
+                }
+            });
+        }
+        
+        document.addEventListener('pointerlockchange', () => {
+            const locked = document.pointerLockElement === canvas;
+            this.isPointerLocked = locked;
+            if (!locked) {
+                document.body.style.cursor = 'default';
+            } else {
+                document.body.style.cursor = 'none';
+            }
+        });
+
         // Mouse down/up events
         document.addEventListener('mousedown', (event) => {
             // Support left OR right click to orbit (tests use left click)
@@ -56,6 +77,27 @@ class CameraController {
         
         // Mouse move for camera rotation
         document.addEventListener('mousemove', (event) => {
+            // Pointer lock mode: rotate continuously by movement deltas
+            if (this.isPointerLocked) {
+                const deltaX = event.movementX || 0;
+                const deltaY = event.movementY || 0;
+                this.horizontalAngle -= deltaX * this.rotationSpeed;
+                this.verticalAngle -= deltaY * this.rotationSpeed;
+                this.verticalAngle = Math.max(this.minVerticalAngle, Math.min(this.maxVerticalAngle, this.verticalAngle));
+                
+                // Optionally rotate character yaw with camera
+                if (this.lockCharacterYawToCamera && this.target && this.target.mesh) {
+                    const lerpAngle = (a, b, t) => {
+                        let delta = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI;
+                        return a + delta * t;
+                    };
+                    const targetYaw = this.horizontalAngle;
+                    this.target.mesh.rotation.y = lerpAngle(this.target.mesh.rotation.y, targetYaw, 0.25);
+                }
+                return;
+            }
+            
+            // Drag to orbit mode
             if (this.isMouseDown) {
                 const deltaX = event.clientX - this.previousMouseX;
                 const deltaY = event.clientY - this.previousMouseY;

@@ -331,7 +331,8 @@ class Player {
         // TPS-style facing: if mouse orbiting, face camera forward; otherwise face movement direction
         const cam = this.gameEngine.camera;
         let targetYaw = null;
-        if (cam && window.gameLogic && window.gameLogic.cameraController && window.gameLogic.cameraController.isMouseDown) {
+        const camController = window.gameLogic && window.gameLogic.cameraController;
+        if (cam && camController && (camController.isPointerLocked || camController.isMouseDown)) {
             const camForward = new THREE.Vector3();
             cam.getWorldDirection(camForward);
             camForward.y = 0; camForward.normalize();

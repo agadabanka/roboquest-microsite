@@ -89,3 +89,14 @@
 - Selenium quick test: movement ~3.5 units in 1s; jump ~1.6 units
 - Console: initially observed transient Cannon.js errors when toggling lock; subsequent runs clean (only low‑FPS warnings). Will monitor and harden error guard in main.js if it reappears.
 - Commits: 2ed33fe, 1d4f068
+
+## ATTEMPT: Behind‑Character Follow + Character‑Relative Movement
+**Time**: 17:35
+**Outcome**: ✅ SUCCESS
+**Details**: Locked camera behind character yaw (jetpack side) and made WASD relative to character orientation. Mouse aim turns character; camera adheres behind in a circle.
+
+- Camera: followBehindTarget enabled; yaw uses character rotation; shortest‑path smoothing and yaw/pitch caps remain
+- Movement: basis from character yaw (not camera); W moves forward of character, A/D strafe
+- Direction cue: cyan arrow above robot shows heading/aim
+- Selenium quick test: movement ~7.7 units in 1s; jump ~1.6; console clean (VM low‑FPS warnings only)
+- Commit: 4fa299f (+ movement basis fix)

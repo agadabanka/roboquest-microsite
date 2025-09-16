@@ -270,12 +270,10 @@ class Player {
         const force = new CANNON.Vec3();
         let isMoving = false;
         
-        // Compute camera-relative basis vectors
-        const camForwardThree = new THREE.Vector3();
-        this.gameEngine.camera.getWorldDirection(camForwardThree);
-        camForwardThree.y = 0;
-        camForwardThree.normalize();
-        const camRightThree = new THREE.Vector3().crossVectors(camForwardThree, new THREE.Vector3(0, 1, 0)).normalize();
+        // Compute character-relative basis vectors (TPS style)
+        const yaw = this.mesh.rotation.y;
+        const charForward = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw));
+        const charRight = new THREE.Vector3(charForward.z, 0, -charForward.x); // rotate 90° right on XZ plane
         
         // Accumulate input in camera space
         let moveX = 0;
@@ -310,11 +308,11 @@ class Player {
             isMoving = true;
         }
         
-        // Build movement vector in world space from camera basis
+        // Build movement vector in world space from character basis
         const moveDirThree = new THREE.Vector3();
         if (isMoving) {
-            moveDirThree.addScaledVector(camForwardThree, moveZ);
-            moveDirThree.addScaledVector(camRightThree, moveX);
+            moveDirThree.addScaledVector(charForward, moveZ);
+            moveDirThree.addScaledVector(charRight, moveX);
             if (moveDirThree.lengthSq() > 0) moveDirThree.normalize();
         }
         
@@ -347,8 +345,8 @@ class Player {
             // More frequent debugging
             if (Math.random() < 0.05) {
                 console.log('🚀 Movement Debug:', {
-                    camForward: {x: camForwardThree.x.toFixed(2), z: camForwardThree.z.toFixed(2)},
-                    camRight: {x: camRightThree.x.toFixed(2), z: camRightThree.z.toFixed(2)},
+                    charForward: {x: charForward.x.toFixed(2), z: charForward.z.toFixed(2)},
+                    charRight: {x: charRight.x.toFixed(2), z: charRight.z.toFixed(2)},
                     moveDir: {x: moveDirThree.x.toFixed(2), z: moveDirThree.z.toFixed(2)},
                     desiredVelocity: this.physicsBody ? {x: this.physicsBody.velocity.x.toFixed(2), z: this.physicsBody.velocity.z.toFixed(2)} : null,
                     actualVelocity: {x: this.physicsBody.velocity.x, z: this.physicsBody.velocity.z},

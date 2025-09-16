@@ -21,12 +21,12 @@ class Player {
         this.coins = 0;
         this.lives = 3;
         
-        // Movement parameters (TPS-style, more responsive)
-        this.moveSpeed = 50; // Faster traversal for tighter feel
-        this.jumpForce = 11; // Slightly stronger, still smooth
-        this.hoverForce = 6; // Softer hover assist
-        this.accelLerp = 0.35; // Quicker acceleration to target speed
-        this.turnLerp = 0.25;  // Snappier turning
+        // Movement parameters (TPS-style, 10x faster)
+        this.moveSpeed = 500; // 10x boost for much faster traversal
+        this.jumpForce = 16;  // Stronger jump to keep feel after speed boost
+        this.hoverForce = 6;  // Softer hover assist
+        this.accelLerp = 0.6; // Faster acceleration to reach target speed quickly
+        this.turnLerp = 0.25; // Snappier turning
         this.maxHoverTime = 1.0; // 1 second hover like Astro Bot
         this.currentHoverTime = 0;
         this.isHovering = false;

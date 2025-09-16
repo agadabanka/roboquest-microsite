@@ -57,3 +57,35 @@
 - Jump: slightly stronger but still smooth; hover unchanged
 - Selenium quick test results: movement ~3.0 units in 1s; jump gain ~1.7; console clean
 - Commit: c270d05
+
+## ATTEMPT: 10x Movement Speed + Jump Retune
+**Time**: 17:06
+**Outcome**: ✅ SUCCESS
+**Details**: Increased traversal speed significantly and rebalanced jump so it still feels responsive.
+
+- Movement: moveSpeed=500 (10x), accelLerp=0.6 for rapid acceleration
+- Jump: jumpForce=16 to maintain arc responsiveness at higher run speed
+- Selenium quick test: ~100 units in 1s; jump gain ~2.1; console clean (occasional low-FPS warnings)
+- Commit: 3341f56
+
+## ATTEMPT: User Movement Re‑tune (Player.js)
+**Time**: 17:12
+**Outcome**: ✅ SUCCESS
+**Details**: Incorporated user tweaks to Player.js and validated.
+
+- Movement: user adjusted parameters (e.g., moveSpeed ~100 in current file)
+- Selenium quick test: movement ~2.2 units in 1s; jump ~3.1 units; console clean
+- Commit: f82d8c1
+
+## ATTEMPT: Pointer‑Lock TPS Camera + Tighter Pitch
+**Time**: 17:20
+**Outcome**: ✅ SUCCESS (monitoring)
+**Details**: Added proper pointer‑lock aiming with smoothed yaw/pitch, reduced sensitivity, and tighter pitch limits. Character faces camera while aiming; orbit‑drag fallback retained.
+
+- Camera: pointer‑lock using movementX/movementY; smoothed target yaw/pitch
+- Limits: pitch clamped to approx −35°..+25° (configurable)
+- Sensitivity: lowered for tighter control; stronger angle smoothing
+- Movement: player faces camera yaw when pointer‑lock or drag active; faces move direction otherwise
+- Selenium quick test: movement ~3.5 units in 1s; jump ~1.6 units
+- Console: initially observed transient Cannon.js errors when toggling lock; subsequent runs clean (only low‑FPS warnings). Will monitor and harden error guard in main.js if it reappears.
+- Commits: 2ed33fe, 1d4f068

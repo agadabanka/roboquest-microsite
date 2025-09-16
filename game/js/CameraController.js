@@ -17,6 +17,7 @@ class CameraController {
         this.maxYawSpeed = options.maxYawSpeed || 0.06;   // rad per frame cap
         this.maxPitchSpeed = options.maxPitchSpeed || 0.04; // rad per frame cap
         this.lockCharacterYawToCamera = options.lockCharacterYawToCamera !== false; // default true
+        this.followBehindTarget = options.followBehindTarget !== false; // default true: keep camera behind character
         
         // Mouse control state
         this.isMouseDown = false;
@@ -167,11 +168,15 @@ class CameraController {
         // Enforce pitch clamp post-update
         this.verticalAngle = Math.max(this.minVerticalAngle, Math.min(this.maxVerticalAngle, this.verticalAngle));
         
-        // Calculate desired camera position based on smoothed angles
+        // Calculate desired camera position
         const cosPitch = Math.cos(this.verticalAngle);
-        const desiredX = targetPosition.x + Math.sin(this.horizontalAngle) * this.distance * cosPitch;
+        // If follow-behind mode is on, lock camera yaw to character's yaw (stay behind the jetpack)
+        const yawForCamera = (this.followBehindTarget && this.target && this.target.mesh)
+            ? this.target.mesh.rotation.y
+            : this.horizontalAngle;
+        const desiredX = targetPosition.x + Math.sin(yawForCamera) * this.distance * cosPitch;
         const desiredY = targetPosition.y + this.height + Math.sin(this.verticalAngle) * this.distance;
-        const desiredZ = targetPosition.z + Math.cos(this.horizontalAngle) * this.distance * cosPitch;
+        const desiredZ = targetPosition.z + Math.cos(yawForCamera) * this.distance * cosPitch;
         
         const desiredPosition = new THREE.Vector3(desiredX, desiredY, desiredZ);
         

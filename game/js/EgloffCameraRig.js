@@ -18,6 +18,7 @@ class EgloffCameraRig {
     this.yawSmooth = options.yawSmooth ?? 0.18;
     this.pitchSmooth = options.pitchSmooth ?? 0.18;
     this.mouseSensitivity = options.mouseSensitivity ?? 0.00125;
+    this.enableFreeYawOnMouseMove = options.enableFreeYawOnMouseMove ?? true; // rotate yaw while mouse moves over canvas
 
     // Rig hierarchy
     this.yawPivot = new THREE.Object3D();
@@ -82,13 +83,18 @@ class EgloffCameraRig {
     document.addEventListener('mouseup', (e) => { if (e.button === 0) isMouseDown = false; });
     document.addEventListener('mousemove', (e) => {
       if (this.pointerLocked) return;
-      if (!isMouseDown) return;
+      // If dragging: adjust yaw+pitch. If free mouse move enabled: adjust yaw only.
       const dx = e.clientX - lastX;
       const dy = e.clientY - lastY;
       lastX = e.clientX; lastY = e.clientY;
-      this.yawTarget -= dx * this.mouseSensitivity;
-      this.pitchTarget -= dy * this.mouseSensitivity;
-      this.pitchTarget = Math.max(this.minPitch, Math.min(this.maxPitch, this.pitchTarget));
+      if (isMouseDown) {
+        this.yawTarget -= dx * this.mouseSensitivity;
+        this.pitchTarget -= dy * this.mouseSensitivity;
+        this.pitchTarget = Math.max(this.minPitch, Math.min(this.maxPitch, this.pitchTarget));
+      } else if (this.enableFreeYawOnMouseMove) {
+        // Turn-in-place yaw when mouse moves over canvas (no pitch change)
+        this.yawTarget -= dx * (this.mouseSensitivity * 0.6);
+      }
       if (this.yawTarget > Math.PI) this.yawTarget -= Math.PI * 2;
       if (this.yawTarget < -Math.PI) this.yawTarget += Math.PI * 2;
     });

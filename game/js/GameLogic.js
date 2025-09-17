@@ -36,14 +36,17 @@ class GameLogic {
         // Create camera controller (A/B by query: ?controller=egloff)
         const params = new URLSearchParams(window.location.search);
         const controller = params.get('controller');
-        if (controller === 'egloff' && window.EgloffCameraRig) {
+        const useLegacy = controller === 'legacy';
+        if (!useLegacy && window.EgloffCameraRig) {
             this.cameraController = new EgloffCameraRig(this.gameEngine.camera, this.player, {
-                height: 1.6, distance: 6.0
+                scene: this.gameEngine.scene,
+                height: 1.6,
+                distance: 6.0
             });
-            console.log('📷 Egloff camera rig created');
+            console.log('📷 Egloff camera rig (default) created');
         } else {
             this.cameraController = new CameraController(this.gameEngine.camera, this.player);
-            console.log('📷 3rd person camera controller created');
+            console.log('📷 Legacy camera controller created');
         }
         
         // Initialize audio (basic web audio for effects)

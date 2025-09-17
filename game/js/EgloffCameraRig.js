@@ -9,6 +9,7 @@ class EgloffCameraRig {
   constructor(camera, target, options = {}) {
     this.camera = camera;
     this.target = target; // expects Player with mesh
+    this.scene = options.scene || null;
 
     this.height = options.height ?? 1.6; // eye height offset
     this.distance = options.distance ?? 6.0; // camera boom length
@@ -23,6 +24,15 @@ class EgloffCameraRig {
     this.pitchPivot = new THREE.Object3D();
     this.yawPivot.add(this.pitchPivot);
     this.pitchPivot.add(this.camera);
+    // Attach rig to scene so transforms propagate
+    if (this.scene && this.scene.add) {
+      this.scene.add(this.yawPivot);
+    } else {
+      // Attempt to find scene via target's parents
+      let parent = this.target && this.target.mesh ? this.target.mesh.parent : null;
+      while (parent && !parent.isScene) parent = parent.parent;
+      if (parent && parent.add) parent.add(this.yawPivot);
+    }
 
     // Place camera behind pitch pivot
     this.camera.position.set(0, 0, -this.distance);
@@ -49,6 +59,7 @@ class EgloffCameraRig {
       document.body.style.cursor = this.pointerLocked ? 'none' : 'default';
     });
 
+    // Pointer lock look
     document.addEventListener('mousemove', (e) => {
       if (!this.pointerLocked) return;
       const dx = e.movementX || 0;
@@ -58,6 +69,26 @@ class EgloffCameraRig {
       // clamp pitch
       this.pitchTarget = Math.max(this.minPitch, Math.min(this.maxPitch, this.pitchTarget));
       // normalize yaw to [-PI..PI]
+      if (this.yawTarget > Math.PI) this.yawTarget -= Math.PI * 2;
+      if (this.yawTarget < -Math.PI) this.yawTarget += Math.PI * 2;
+    });
+
+    // Drag-to-look fallback when not pointer locked
+    let isMouseDown = false;
+    let lastX = 0, lastY = 0;
+    document.addEventListener('mousedown', (e) => {
+      if (e.button === 0) { isMouseDown = true; lastX = e.clientX; lastY = e.clientY; }
+    });
+    document.addEventListener('mouseup', (e) => { if (e.button === 0) isMouseDown = false; });
+    document.addEventListener('mousemove', (e) => {
+      if (this.pointerLocked) return;
+      if (!isMouseDown) return;
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      lastX = e.clientX; lastY = e.clientY;
+      this.yawTarget -= dx * this.mouseSensitivity;
+      this.pitchTarget -= dy * this.mouseSensitivity;
+      this.pitchTarget = Math.max(this.minPitch, Math.min(this.maxPitch, this.pitchTarget));
       if (this.yawTarget > Math.PI) this.yawTarget -= Math.PI * 2;
       if (this.yawTarget < -Math.PI) this.yawTarget += Math.PI * 2;
     });

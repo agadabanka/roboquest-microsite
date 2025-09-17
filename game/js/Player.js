@@ -270,14 +270,15 @@ class Player {
         const force = new CANNON.Vec3();
         let isMoving = false;
         
-        // Compute character-relative basis vectors (TPS style)
-        const yaw = this.mesh.rotation.y;
-        const charForward = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw));
-        const charRight = new THREE.Vector3(charForward.z, 0, -charForward.x); // rotate 90° right on XZ plane
+        // Aim direction from camera (XZ)
+        const aimDir = new THREE.Vector3();
+        this.gameEngine.camera.getWorldDirection(aimDir);
+        aimDir.y = 0;
+        if (aimDir.lengthSq() > 0) aimDir.normalize();
         
-        // Accumulate input in camera space
-        let moveX = 0;
-        let moveZ = 0;
+        // Accumulate input (no A/D strafing per request)
+        let forward = false;
+        let backward = false;
         
         // Debug input every 60 frames (1 second) to avoid spam
         if (Math.floor(Date.now() / 1000) % 2 === 0 && Math.random() < 0.02) {
@@ -292,28 +293,17 @@ class Player {
         
         // Physics-based movement (Step 6: Final movement system)
         if (this.gameEngine.isKeyPressed('KeyW') || this.gameEngine.isKeyPressed('ArrowUp')) {
-            moveZ += 1; // forward
-            isMoving = true;
+            forward = true; isMoving = true;
         }
         if (this.gameEngine.isKeyPressed('KeyS') || this.gameEngine.isKeyPressed('ArrowDown')) {
-            moveZ -= 1; // backward
-            isMoving = true;
-        }
-        if (this.gameEngine.isKeyPressed('KeyA') || this.gameEngine.isKeyPressed('ArrowLeft')) {
-            moveX -= 1; // left
-            isMoving = true;
-        }
-        if (this.gameEngine.isKeyPressed('KeyD') || this.gameEngine.isKeyPressed('ArrowRight')) {
-            moveX += 1; // right
-            isMoving = true;
+            backward = true; isMoving = true;
         }
         
-        // Build movement vector in world space from character basis
+        // Build movement vector in world space from aim direction
         const moveDirThree = new THREE.Vector3();
-        if (isMoving) {
-            moveDirThree.addScaledVector(charForward, moveZ);
-            moveDirThree.addScaledVector(charRight, moveX);
-            if (moveDirThree.lengthSq() > 0) moveDirThree.normalize();
+        if (isMoving && aimDir.lengthSq() > 0) {
+            moveDirThree.copy(aimDir);
+            if (backward && !forward) moveDirThree.multiplyScalar(-1);
         }
         
         // Apply movement to physics body with damping when idle
@@ -345,8 +335,7 @@ class Player {
             // More frequent debugging
             if (Math.random() < 0.05) {
                 console.log('🚀 Movement Debug:', {
-                    charForward: {x: charForward.x.toFixed(2), z: charForward.z.toFixed(2)},
-                    charRight: {x: charRight.x.toFixed(2), z: charRight.z.toFixed(2)},
+                    aimDir: {x: aimDir.x.toFixed(2), z: aimDir.z.toFixed(2)},
                     moveDir: {x: moveDirThree.x.toFixed(2), z: moveDirThree.z.toFixed(2)},
                     desiredVelocity: this.physicsBody ? {x: this.physicsBody.velocity.x.toFixed(2), z: this.physicsBody.velocity.z.toFixed(2)} : null,
                     actualVelocity: {x: this.physicsBody.velocity.x, z: this.physicsBody.velocity.z},
@@ -356,39 +345,30 @@ class Player {
             }
         }
 
-        // TPS-style facing: if mouse aiming/orbiting, face camera forward; otherwise face movement direction
+        // TPS-style facing: Egloff rig rotates the character. Avoid double-rotating here if Egloff is active.
         const cam = this.gameEngine.camera;
         let targetYaw = null;
         const camController = window.gameLogic && window.gameLogic.cameraController;
-        if (cam && camController && (camController.isPointerLocked || camController.isMouseDown)) {
-            const camForward = new THREE.Vector3();
-            cam.getWorldDirection(camForward);
-            camForward.y = 0; camForward.normalize();
-            targetYaw = Math.atan2(camForward.x, camForward.z);
-        } else if (isMoving && moveDirThree.lengthSq() > 0) {
-            targetYaw = Math.atan2(moveDirThree.x, moveDirThree.z);
-        }
-        if (targetYaw !== null) {
-            const lerpAngle = (a, b, t) => {
-                let delta = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI;
-                return a + delta * t;
-            };
-            this.mesh.rotation.y = lerpAngle(this.mesh.rotation.y, targetYaw, this.turnLerp);
+        const isEgloff = camController && camController.constructor && camController.constructor.name === 'EgloffCameraRig';
+        if (!isEgloff) {
+            if (cam && camController && (camController.isPointerLocked || camController.isMouseDown)) {
+                const camForward = aimDir; // already computed
+                targetYaw = Math.atan2(camForward.x, camForward.z);
+            } else if (isMoving && moveDirThree.lengthSq() > 0) {
+                targetYaw = Math.atan2(moveDirThree.x, moveDirThree.z);
+            }
+            if (targetYaw !== null) {
+                const lerpAngle = (a, b, t) => {
+                    let delta = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI;
+                    return a + delta * t;
+                };
+                this.mesh.rotation.y = lerpAngle(this.mesh.rotation.y, targetYaw, this.turnLerp);
+            }
         }
 
         // Update direction indicator: prefer movement dir, else camera forward while aiming
-        const indicatorDir = (isMoving && moveDirThree.lengthSq() > 0)
-            ? moveDirThree
-            : (camController && (camController.isPointerLocked || camController.isMouseDown))
-                ? new THREE.Vector3().copy(new THREE.Vector3().setFromMatrixColumn(this.gameEngine.camera.matrixWorld, 0)).cross(new THREE.Vector3(0,1,0)).negate() // fallback if needed
-                : new THREE.Vector3(0, 0, 0);
-        // Better: get camera forward
-        if (camController && (camController.isPointerLocked || camController.isMouseDown) && (!isMoving || indicatorDir.lengthSq() === 0)) {
-            const camForward = new THREE.Vector3();
-            this.gameEngine.camera.getWorldDirection(camForward);
-            camForward.y = 0;
-            indicatorDir.copy(camForward);
-        }
+        // Direction indicator: show motion if moving, else aim
+        const indicatorDir = (isMoving && moveDirThree.lengthSq() > 0) ? moveDirThree : aimDir.clone();
         this.updateDirectionIndicator(indicatorDir);
         
         // Debug telemetry for automated tests

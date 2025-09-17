@@ -78,9 +78,9 @@ def run():
                 if abs(dyaw) > 0.5:
                     yaw_errors += 1
 
-            # WASD exercise (move forward then strafe):
-            actions.key_down('w').perform(); time.sleep(0.3); actions.key_up('w').perform()
-            actions.key_down('d').perform(); time.sleep(0.3); actions.key_up('d').perform()
+            # Forward/back exercise only (no strafing)
+            actions.key_down('w').perform(); time.sleep(0.4); actions.key_up('w').perform()
+            actions.key_down('s').perform(); time.sleep(0.2); actions.key_up('s').perform()
 
             # Screenshot every ~5s
             if int(time.time()-start) % 5 == 0:

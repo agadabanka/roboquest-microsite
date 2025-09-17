@@ -17,6 +17,7 @@ class EgloffCameraRig {
     this.maxPitch = options.maxPitch ?? 0.35;  // ~+20°
     this.yawSmooth = options.yawSmooth ?? 0.18;
     this.pitchSmooth = options.pitchSmooth ?? 0.18;
+    this.charTurnLerp = options.charTurnLerp ?? 0.6; // faster character facing
     this.mouseSensitivity = options.mouseSensitivity ?? 0.00125;
     this.enableFreeYawOnMouseMove = options.enableFreeYawOnMouseMove ?? true; // rotate yaw while mouse moves over canvas
 
@@ -127,7 +128,7 @@ class EgloffCameraRig {
 
     // Rotate character to face aim
     const aimYaw = this.yaw; // face where the camera is aiming (on XZ)
-    const newYaw = this._lerpAngle(this.target.mesh.rotation.y, aimYaw, 0.25);
+    const newYaw = this._lerpAngle(this.target.mesh.rotation.y, aimYaw, this.charTurnLerp);
     this.target.mesh.rotation.y = newYaw;
 
     // Telemetry for tests

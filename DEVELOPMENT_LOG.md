@@ -100,3 +100,92 @@
 - Direction cue: cyan arrow above robot shows heading/aim
 - Selenium quick test: movement ~7.7 units in 1s; jump ~1.6; console clean (VM low‑FPS warnings only)
 - Commit: 4fa299f (+ movement basis fix)
+
+## ATTEMPT: OrbitControls Integration + Telemetry
+**Time**: 17:42  
+**Outcome**: ✅ PARTIAL  
+**Details**: Integrated examples OrbitControls for robust orbit damping and added window telemetry for tests (`__camDebug`, `__playerDebug`). Helped stabilize orbit but strict camera-behind checks needed tolerance due to damping.  
+**Key Learnings**:
+- Use damping-aware thresholds (avg over 300–500ms) rather than per-frame assertions
+- Keep a single authority for character yaw to avoid double-writes (Player vs Camera)
+- Add null-safe error logging in `main.js` to avoid noisy console traces
+
+## ATTEMPT: Egloff-Style Rig (Yaw/Pitch Pivots)
+**Time**: 17:55  
+**Outcome**: ✅ SUCCESS  
+**Details**: Implemented Egloff TPS rig with yaw and pitch pivots, pointer-lock look, and drag-to-look fallback. Camera is behind character; character yaw follows aim each frame.  
+**Notes**:
+- Added rig to scene for proper world transforms
+- Tight pitch clamp and capped per-frame angle deltas prevent oscillation
+- A/B switch via `?controller=egloff` (now default, legacy via `?controller=legacy`)
+- Test: 20s TPS integration — yaw issues: 0, behind issues: 0, console: 0
+- Commits: abe8562, a090201
+
+## ATTEMPT: Aim-Driven Movement (No Strafe)
+**Time**: 18:05  
+**Outcome**: ✅ SUCCESS  
+**Details**: Movement vector now derives from camera forward on XZ; W moves toward aim, S moves backward; A/D ignored as requested; arrow shows motion direction or aim when idle.  
+**Commits**: b50041e
+
+## ATTEMPT: Character Rotation Validation
+**Time**: 18:10  
+**Outcome**: ✅ SUCCESS  
+**Details**: Added `test_character_rotation.py` to assert that mouse movement rotates the player mesh (without clicks). Saves before/after screenshots and reports yaw deltas.  
+**Result**: Δ1≈0.18 rad, Δ2≈0.09 rad; console clean  
+**Commit**: dbc7441
+
+## ATTEMPT: Facing Responsiveness Boost
+**Time**: 18:14  
+**Outcome**: ✅ SUCCESS  
+**Details**: Increased character facing lerp and snap on large yaw deltas to keep up with mouse flicks; removed lag behind camera yaw.  
+**Commit**: 67fe50e
+
+## RELEASE: Playable Version 2
+**Time**: 18:18  
+**Outcome**: 🏁 TAGGED  
+**Details**: Egloff camera default, aim-driven movement, `D` key mapped to jump alongside Space.  
+**Tag**: `playable-version-2` (commit da0ca49)
+## ATTEMPT: OrbitControls Integration + Telemetry
+**Time**: 17:42  
+**Outcome**: ✅ PARTIAL  
+**Details**: Integrated examples OrbitControls for robust orbit damping and added window telemetry for tests (`__camDebug`, `__playerDebug`). Helped stabilize orbit but strict camera-behind checks needed tolerance due to damping.  
+**Key Learnings**:
+- Use damping-aware thresholds (avg over 300–500ms) rather than per-frame assertions
+- Keep a single authority for character yaw to avoid double-writes (Player vs Camera)
+- Add null-safe error logging in `main.js` to avoid noisy console traces
+
+## ATTEMPT: Egloff-Style Rig (Yaw/Pitch Pivots)
+**Time**: 17:55  
+**Outcome**: ✅ SUCCESS  
+**Details**: Implemented Egloff TPS rig with yaw and pitch pivots, pointer-lock look, and drag-to-look fallback. Camera is behind character; character yaw follows aim each frame.  
+**Notes**:
+- Added rig to scene for proper world transforms
+- Tight pitch clamp and capped per-frame angle deltas prevent oscillation
+- A/B switch via `?controller=egloff` (now default, legacy via `?controller=legacy`)
+- Test: 20s TPS integration — yaw issues: 0, behind issues: 0, console: 0
+- Commits: abe8562, a090201
+
+## ATTEMPT: Aim-Driven Movement (No Strafe)
+**Time**: 18:05  
+**Outcome**: ✅ SUCCESS  
+**Details**: Movement vector now derives from camera forward on XZ; W moves toward aim, S moves backward; A/D ignored as requested; arrow shows motion direction or aim when idle.  
+**Commits**: b50041e
+
+## ATTEMPT: Character Rotation Validation
+**Time**: 18:10  
+**Outcome**: ✅ SUCCESS  
+**Details**: Added `test_character_rotation.py` to assert that mouse movement rotates the player mesh (without clicks). Saves before/after screenshots and reports yaw deltas.  
+**Result**: Δ1≈0.18 rad, Δ2≈0.09 rad; console clean  
+**Commit**: dbc7441
+
+## ATTEMPT: Facing Responsiveness Boost
+**Time**: 18:14  
+**Outcome**: ✅ SUCCESS  
+**Details**: Increased character facing lerp and snap on large yaw deltas to keep up with mouse flicks; removed lag behind camera yaw.  
+**Commit**: 67fe50e
+
+## RELEASE: Playable Version 2
+**Time**: 18:18  
+**Outcome**: 🏁 TAGGED  
+**Details**: Egloff camera default, aim-driven movement, `D` key mapped to jump alongside Space.  
+**Tag**: `playable-version-2` (commit da0ca49)

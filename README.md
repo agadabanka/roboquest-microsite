@@ -5,9 +5,22 @@ A complete Astro Bot-inspired indie mobile 3D platformer with professional marke
 **🌐 Live Demo:** https://roboquest.ninja  
 **🎮 Play Game:** https://roboquest.ninja/game  
 **📋 Repository:** https://github.com/agadabanka/roboquest-microsite  
-**🏷️ Stable Release:** v1.0-playable  
+**🏷️ Stable Release:** playable-version-2  
 
-![RoboQuest Game Screenshot](docs/screenshots/development/velocity_test_2_after_D.png)
+![RoboQuest Game Screenshot](./tps_debug_20.png)
+
+## 📸 Latest Screenshots
+
+Inline rotation and TPS tests:
+
+![Before](./character_rotation_before.png)
+![After](./character_rotation_after.png)
+
+TPS integration samples:
+
+![tps 5](./tps_debug_5.png)
+![tps 10](./tps_debug_10.png)
+![tps 20](./tps_debug_20.png)
 
 ---
 
@@ -88,19 +101,18 @@ game/
 
 ---
 
-## 🎮 Controls & Gameplay
+## 🎮 Controls & Gameplay (Playable Version 2)
 
 ### Keyboard Controls
-- **W** - Move Forward
-- **A** - Move Left  
-- **S** - Move Backward
-- **D** - Move Right
+- **W** - Move Forward (toward aim)
+- **S** - Move Backward (away from aim)
+- **D** - Jump (also Space)
 - **Space** - Jump / Hover (jetpack ability)
 
 ### Mouse Controls
-- **Mouse Move** - Look around
-- **Left Click** - Activate hover/jetpack
-- **Right Click + Drag** - Orbit camera around character
+- **Mouse Move** - Aim and rotate character in place
+- **Click** - Pointer lock (FPS-style look)
+- **Left-Drag** - Drag-to-look fallback (yaw+pitch)
 
 ### Debug Controls
 - **R** - Restart game
@@ -123,12 +135,11 @@ The project includes a comprehensive testing system using:
 ### Testing Files
 ```
 docs/testing/
-├── auto_test_game.py              # Automated console monitoring
-├── comprehensive_movement_test.py # Full movement exercise plans
-├── visual_movement_test.py        # Before/after screenshot testing
-├── debug_movement_test.py         # Button testing and force analysis
-├── screenshot_test.py             # Visual validation framework
-└── test-movement.html             # Simple movement testing sandbox
+├── test_game.py                   # Quick smoke with console logs
+├── tuned_movement_test.py         # Movement exercise plan + screenshots
+├── tps_integration_test.py        # 20s TPS loop; yaw/behind assertions
+├── test_character_rotation.py     # Verifies mesh yaw changes with mouse
+└── screenshot_test.py             # Visual validation framework
 ```
 
 ### Development Methodology

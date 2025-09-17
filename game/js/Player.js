@@ -381,8 +381,8 @@ class Player {
             };
         } catch (e) { /* ignore */ }
         
-        // Jumping (Space key)
-        if (this.gameEngine.isKeyPressed('Space')) {
+        // Jumping (Space key or D key per request)
+        if (this.gameEngine.isKeyPressed('Space') || this.gameEngine.isKeyPressed('KeyD')) {
             if (this.isGrounded) {
                 this.jump();
             } else if (this.canDoubleJump && !this.hasUsedDoubleJump) {
